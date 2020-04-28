@@ -8,36 +8,14 @@ import glob
 #                                                     #
 #######################################################
 
-toReplace = "coolDown:" # which behavior parameter it checks numbers of
-roundTo = 200 # the number to round to
-toAdd = " " # adds a space between toReplace and the new cooldown
-prefix = toReplace + toAdd
-
-path = "*.cs" # or "something/server/wServer/logic/db/*.cs"
-
-def getNewCool(oldCool, minNum, shouldRound):
+def cools(path, toReplace = "coolDown:", minCool = 200, roundTo = 0, formatAdd = " "):
     '''
-    Sets everything to multiples of roundTo. Useful for getting rid of weird numbers
-    Sets negative numbers to 0
+    path: specifies which files to replace cooldowns in
+    toReplace: keyword before cooldowns. i.e. use "coolDownOffset:" if fixing coolDownOffset cooldowns
+    minCool: cooldowns that are lower than minCool are set to minCool
+    roundTo: all cooldowns are rounded up to the nearest roundTo. if roundTo is 0 then no cooldowns will be rounded.
+    formatAdd: used to add a space between toReplace and the new cooldown
     '''
-    info = getNumberAndEndIndex(oldCool)
-
-    oldNum = info[0]
-
-    if (shouldRound):
-        newNum = oldNum + (roundTo - (oldNum % roundTo)) # rounds up to the nearest roundTo
-            # rounds up instead of down because, if the server is running 5 tps:
-            # 0 ms is when the first tick happens, 100 ms cooldowns are delayed until the second tick
-            # 200 ms is when the second tick happens, 201 ms is delayed until the third tick (at 400 ms)
-    else:
-        newNum = oldNum
-
-    newNum = max(minNum, newNum)
-
-    newCool = prefix + str(newNum) + oldCool[info[1]:]
-    return (newCool, newNum != oldNum, newNum)
-
-def cools(minNum, shouldRound):
     for fileName in glob.glob(path):
         updates = []
         fo = open(fileName, "r")
@@ -46,30 +24,37 @@ def cools(minNum, shouldRound):
 
         for x in range(1, len(fileArr)):
             cool = fileArr[x]
-            newCool = getNewCool(cool, minNum, shouldRound)
+            newCool = getNewCool(cool, minCool, roundTo, toReplace + formatAdd)
             fileArr[x] = newCool[0]
             if (newCool[1]):
                 updates.append(x)
 
         fileDispName = fileName[fileName.rfind("/") + 1:]
         newFileText = "".join(fileArr)
-        printFileUpdates(fileDispName, updates)
+        printFileUpdates(fileDispName, updates, toReplace)
         replaceFileText(fileName, newFileText)
 
-class fileLineStorage:
-    linesInfo = []
-    lineNum = 0
+def getNewCool(oldCoolText, minCool, roundTo, prefix):
+    '''
+    Sets numbers lower than minCool to minCool
+    Sets everything to multiples of roundTo. Useful for getting rid of weird numbers
+    '''
+    info = getNumberAndEndIndex(oldCoolText)
 
-    def __init__(this):
-        this.linesInfo = [0]
-        this.lineNum = 0
+    oldCool = info[0]
 
-    def addInfo(this, val):
-        this.linesInfo.append(val)
-        this.lineNum += 1
+    if (roundTo != 0 and oldCool % roundTo != 0):
+        newCool = oldCool + (roundTo - (oldCool % roundTo)) # rounds up to the nearest roundTo
+            # rounds up instead of down because, if the server is running 5 tps:
+            # 0 ms is when the first tick happens, 100 ms cooldowns are delayed until the second tick
+            # 200 ms is when the second tick happens, 201 ms is delayed until the third tick (at 400 ms)
+    else:
+        newCool = oldCool
 
-    def prev(this):
-        return this.linesInfo[-1]
+    newCool = max(minCool, newCool)
+
+    newCoolText = prefix + str(newCool) + oldCoolText[info[1]:]
+    return (newCoolText, newCool != oldCool, newCool)
 
 def getNumberAndEndIndex(src):
     '''
@@ -87,11 +72,14 @@ def getNumberAndEndIndex(src):
         
     return (0, 0) # default return value
 
-def printFileUpdates(fileName, updates):
-    if (len(updates) > 0):
+def printFileUpdates(fileName, updatedOccurences, whatWasUpdated):
+    '''
+    Function to print out updated cooldowns
+    '''
+    if (len(updatedOccurences) > 0):
         print(fileName + ":") # print() automatically adds a newline at the end
-        for x in updates:
-            print("Updated \"" + toReplace + "\" occurence #" + str(x) + ".")
+        for x in updatedOccurences:
+            print("Updated \"" + whatWasUpdated + "\" occurence #" + str(x) + ".")
         print()
 
 def replaceFileText(file, text):
@@ -101,4 +89,4 @@ def replaceFileText(file, text):
     fo.close()
 
 
-cools(5, False)
+cools("*.cs", "coolDown:", 200, 0, " ")
