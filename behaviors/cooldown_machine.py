@@ -1,66 +1,43 @@
 import glob
 
+# Note: Don't use this on behavior files that won't compile
+
 #######################################################
 #                                                     #
 #  The Cooldown Machine, for fixing broken cooldowns  #
 #                                                     #
 #######################################################
 
-toReplace = "coolDown:" # what behavior parameters it checks numbers for
-minCool = 200 # the minimum allowable cooldown
+toReplace = "coolDown:" # which behavior parameter it checks numbers of
+roundTo = 200 # the number to round to
 toAdd = " " # adds a space between toReplace and the new cooldown
 prefix = toReplace + toAdd
 
 path = "*.cs" # or "something/server/wServer/logic/db/*.cs"
 
-def getNewCool(oldCool):
+def getNewCool(oldCool, minNum, shouldRound):
     '''
-    Increases a cooldown from less than minCool to minCool
-    oldCool must be a string that begins with an int. There can be whitespace before the int.
-    returns (int cooldown, bool was_cooldown_changed)
+    Sets everything to multiples of roundTo. Useful for getting rid of weird numbers
+    Sets negative numbers to 0
     '''
     info = getNumberAndEndIndex(oldCool)
-    newCool = prefix
-    if (info[0] < minCool): # if old cooldown is less than minimum new cooldown then replace it
-        newCool += str(minCool) + oldCool[info[1]:]
-        return (newCool, True)
-    else: # don't change the cooldown
-        newCool += str(info[0]) + oldCool[info[1]:]
-        return (newCool, False)
 
+    oldNum = info[0]
 
-def getNewCool2(oldCool, storage):
-    '''
-    Fixes spiral shooting behaviors that use Shoot() with different coolDownOffset values
-    A spiral with coolDownOffsets of 0, 100, 200, 300, 450, 460, 600 will be changed to 0, 200, 200, 400, 600, 600, 600
-    '''
-    oc = oldCool.split(toReplace)
-    newCool = oc[0]
-    changed = False
-    val = 0
-    for i in range(0, len(oc[1])):
-        c = oc[1][i]
-        if (c == " " or c == "\n"):
-            start = i + 1
-            continue
-        elif not c.isdigit():
-            if start != i:
-                fullNum = int(oc[1][start:i])
-                pr = storage.prev()
-                if (fullNum - pr < 200 and pr - fullNum < 200 and fullNum != 0):
-                    fullNum += (200 - (fullNum % 200))
-                    changed = True
-                val = fullNum
-                newCool += toReplace + toAdd + str(fullNum) + oc[1][i:]
-            break
+    if (shouldRound):
+        newNum = oldNum + (roundTo - (oldNum % roundTo)) # rounds up to the nearest roundTo
+            # rounds up instead of down because, if the server is running 5 tps:
+            # 0 ms is when the first tick happens, 100 ms cooldowns are delayed until the second tick
+            # 200 ms is when the second tick happens, 201 ms is delayed until the third tick (at 400 ms)
+    else:
+        newNum = oldNum
 
-    if (changed):
-        return (newCool, True, val)
+    newNum = max(minNum, newNum)
 
-    return (oldCool, False, val)
+    newCool = prefix + str(newNum) + oldCool[info[1]:]
+    return (newCool, newNum != oldNum, newNum)
 
-
-def cools1():
+def cools(minNum, shouldRound):
     for fileName in glob.glob(path):
         updates = []
         fo = open(fileName, "r")
@@ -69,7 +46,7 @@ def cools1():
 
         for x in range(1, len(fileArr)):
             cool = fileArr[x]
-            newCool = getNewCool(cool)
+            newCool = getNewCool(cool, minNum, shouldRound)
             fileArr[x] = newCool[0]
             if (newCool[1]):
                 updates.append(x)
@@ -78,45 +55,6 @@ def cools1():
         newFileText = "".join(fileArr)
         printFileUpdates(fileDispName, updates)
         replaceFileText(fileName, newFileText)
-
-
-def cools2():
-    '''
-    #################  Currently broken, do not use #################
-    Fixes spiral shooting behaviors that use Shoot() with different coolDownOffset values
-    A spiral with coolDownOffsets of 0, 100, 200, 300, 450, 460, 600 will be changed to 0, 200, 200, 400, 600, 600, 600
-    '''
-    for fileName in glob.glob(path):
-        storage = fileLineStorage()
-        lines = []
-        fo = open(fileName, "r")
-        fileArr = fo.readlines()
-        fo.close()
-
-        #fileArr = fileStr.split(toReplace)
-
-        for x in range(1, len(fileArr)):
-            cool = fileArr[x]
-            if (cool.count(toReplace) > 0):
-                #print("lmao")
-                newCool = getNewCool2(cool, storage)
-                storage.addInfo(newCool[2])
-                if (newCool[1]):
-                    lines.append((x + 1, newCool[0]))
-                    fileArr[x] = newCool[0]
-
-        if (len(lines) > 0):
-            print(fileName[fileName.find("."):])
-            for aj in lines:
-                print(str(aj[0]) + " " + aj[1])
-            #print(str(lines) + "\n")
-
-        output = "".join(fileArr)
-        fo = open("BehaviorDb." + fileName + ".cs", "w")
-        fo.truncate(0)
-        fo.write(output)
-        fo.close()
-
 
 class fileLineStorage:
     linesInfo = []
@@ -163,4 +101,4 @@ def replaceFileText(file, text):
     fo.close()
 
 
-cools2()
+cools(5, False)
