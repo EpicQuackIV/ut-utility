@@ -1,32 +1,60 @@
-from xmltags import xmltag2func
+from xmltags import SetElementData
 
 class Item():
+
+    Item = True
+    Description = None
+    NumProjectiles = 0
+    Tier = -1
+    SlotType = 0
+    GodSlayer = False
+    Godly = False
+    Sacred = False
+    Legendary = False
+    Fabled = False
+    RT = False
+    Shard = False
+
+    Backpack = False
+    Consumable = False
+    FabledToken = False
+    InvUse = False
+    Lootbox = False
+    MultiPhase = False
+    Potion = False
+    QuestItem = False
+    Resurrects = False
+    SorMachine = False
+    Soulbound = False
+    Treasure = False
+    Usable = False
 
     def __init__(this, itemXml):
         this.Id = itemXml.attrib["id"]
         this.ObjType = int(itemXml.attrib["type"], 16)
-        this.Data = ItemData()
+        this.Activate = [] # # List<Tuple<string, Dict<string, string>>>
+        this.ActivateOnEquip = [] # List<Tuple<string, Dict<string, string>>>
 
         for element in itemXml:
-            xmltag2func.get(element.tag, TagNotFound)(this, element)
+            SetElementData(this, element)
 
     def __str__(this):
         try:
             ret = this.Id + "\n"
             ret += "Object Type " + hex(this.ObjType) + "\n"
-            ret += this.Data.Description + "\n" if this.Data.Description else ""
-            if (this.Data.ActivateOnEquip):
+            ret += this.Description + "\n" if this.Description else ""
+            if (this.ActivateOnEquip):
                 ret += "\nWhile equipped:\n"
                 aes = []
-                for ae in this.Data.ActivateOnEquip:
+                for ae in this.ActivateOnEquip:
                     aes.append(aoeformatter.get(ae[0], lambda x: "Unknown AE \"" + ae[0] + "\" on item \"" + this.Id + "\"")(ae[1]))
                 aes.sort()
                 ret += "\n".join(aes) + "\n"
 
-            if (this.Data.Activate):
+            if (this.Activate):
                 ret += "\nWhen used:\n"
                 aes = []
-                for ae in this.Data.Activate:
+                for ae in this.Activate:
                     aes.append(aeformatter.get(ae[0], lambda x: "Unknown AE \"" + ae[0] + "\" on item \"" + this.Id + "\"")(ae[1]))
                 aes.sort()
                 ret += "\n".join(aes) + "\n"
@@ -34,33 +62,22 @@ class Item():
         except:
             return "Error when converting \"" + this.Id + "\" to string.\n"
 
-def TagNotFound(item, xml):
-    print(item.Id + " has an unhandled XML tag: \"" + xml.tag + "\"")
-
-class ItemData:
-
-    Description = ""
-    NumProjectiles = 0
-    Tier = 0
-    SlotType = 0
-    Sacred = False
-    Legendary = False
-    RT = False
-
-    def __init__(this):
-        # initialize empty dictionaries/lists for this instance here
-        this.Activate = [] # # List<Tuple<string, Dict<string, string>>>
-        this.ActivateOnEquip = [] # List<Tuple<string, Dict<string, string>>>
-        pass
-
     def set(this, variableName, value):
-        exec("this." + str(variableName) + "=" + repr(value))
+        setattr(this, str(variableName), value)
 
     def get(this, variableName):
-        '''
-        Only use this for variables that do not have a class (static) instance.
-        '''
-        return eval("this." + str(variableName))
+        return getattr(this, variableName)
+
+
+
+
+
+
+
+
+
+
+
 
 slot2category = {
     1 : "weapon", # sword
@@ -178,129 +195,130 @@ wisMod = lambda x: "Uses wis mod." if x.get("useWisMod", "") == "true" else "Doe
 
 # Always capitalize the sentence and put punctuation at the end.
 aeformatter = {
-    "AbbyConstruct": lambda x: "Activated effect not yet implemented.",
-    "ActivateFragment": lambda x: "Activated effect not yet implemented.",
-    "AnguishofDrannol": lambda x: "Activated effect not yet implemented.",
-    "AscensionActivate": lambda x: "Activated effect not yet implemented.",
-    "AsiHeal": lambda x: "Activated effect not yet implemented.",
-    "AsiimovBox": lambda x: "Activated effect not yet implemented.",
-    "AstonAbility": lambda x: "Activated effect not yet implemented.",
-    "Backpack": lambda x: "Activated effect not yet implemented.",
-    "Banner": lambda x: "Activated effect not yet implemented.",
-    "Belt": lambda x: "Activated effect not yet implemented.",
-    "BigStasisBlast": lambda x: "Activated effect not yet implemented.",
-    "BlackScroll": lambda x: "Activated effect not yet implemented.",
-    "BlizzardBox": lambda x: "Activated effect not yet implemented.",
-    "BronzeLockbox": lambda x: "Activated effect not yet implemented.",
-    "BrownScroll": lambda x: "Activated effect not yet implemented.",
-    "BuildTower": lambda x: "Activated effect not yet implemented.",
-    "BulletNova": lambda x: "Activated effect not yet implemented.",
-    "BulletNova2": lambda x: "Activated effect not yet implemented.",
-    "BurningLightning": lambda x: "Activated effect not yet implemented.",
-    "BurstInferno": lambda x: "Activated effect not yet implemented.",
-    "ChangeSkin": lambda x: "Activated effect not yet implemented.",
-    "ChristmasPopper": lambda x: "Activated effect not yet implemented.",
-    "ClearConditionEffectAura": lambda x: "Activated effect not yet implemented.",
-    "ClearConditionEffectSelf": lambda x: "Activated effect not yet implemented.",
-    "ConditionEffectAura": lambda x: "Activated effect not yet implemented.",
-    "ConditionEffectSelf": lambda x: "Activated effect not yet implemented.",
-    "Create": lambda x: "Activated effect not yet implemented.",
-    "CreateGauntlet": lambda x: "Activated effect not yet implemented.",
-    "CreatePet": lambda x: "Activated effect not yet implemented.",
-    "CrimsonBox": lambda x: "Activated effect not yet implemented.",
-    "DDiceActivate": lambda x: "Activated effect not yet implemented.",
-    "DamageNova": lambda x: "Activated effect not yet implemented.",
-    "DareFistBox": lambda x: "Activated effect not yet implemented.",
-    "DazeBlast": lambda x: "Activated effect not yet implemented.",
-    "Decoy": lambda x: "Activated effect not yet implemented.",
-    "Dice": lambda x: "Activated effect not yet implemented.",
-    "DiceActivate": lambda x: "Activated effect not yet implemented.",
-    "Drake": lambda x: "Activated effect not yet implemented.",
-    "DreamEssenceActivate": lambda x: "Activated effect not yet implemented.",
-    "DualShoot": lambda x: "Activated effect not yet implemented.",
-    "Dye": lambda x: "Activated effect not yet implemented.",
-    "EffectRandom": lambda x: "Activated effect not yet implemented.",
+    "AbbyConstruct": lambda x: "\"AbbyConstruct\" Activated Effect not yet implemented.",
+    "ActivateFragment": lambda x: "\"ActivateFragment\" Activated Effect not yet implemented.",
+    "AnguishofDrannol": lambda x: "\"AnguishofDrannol\" Activated Effect not yet implemented.",
+    "AscensionActivate": lambda x: "\"AscensionActivate\" Activated Effect not yet implemented.",
+    "AsiHeal": lambda x: "\"AsiHeal\" Activated Effect not yet implemented.",
+    "AsiimovBox": lambda x: "\"AsiimovBox\" Activated Effect not yet implemented.",
+    "AstonAbility": lambda x: "\"AstonAbility\" Activated Effect not yet implemented.",
+    "Backpack": lambda x: "\"Backpack\" Activated Effect not yet implemented.",
+    "Banner": lambda x: "\"Banner\" Activated Effect not yet implemented.",
+    "Belt": lambda x: "\"Belt\" Activated Effect not yet implemented.",
+    "BigStasisBlast": lambda x: "\"BigStasisBlast\" Activated Effect not yet implemented.",
+    "BlackScroll": lambda x: "\"BlackScroll\" Activated Effect not yet implemented.",
+    "BlizzardBox": lambda x: "\"BlizzardBox\" Activated Effect not yet implemented.",
+    "BronzeLockbox": lambda x: "\"BronzeLockbox\" Activated Effect not yet implemented.",
+    "BrownScroll": lambda x: "\"BrownScroll\" Activated Effect not yet implemented.",
+    "BuildTower": lambda x: "\"BuildTower\" Activated Effect not yet implemented.",
+    "BulletNova": lambda x: "\"BulletNova\" Activated Effect not yet implemented.",
+    "BulletNova2": lambda x: "\"BulletNova2\" Activated Effect not yet implemented.",
+    "BurningLightning": lambda x: "\"BurningLightning\" Activated Effect not yet implemented.",
+    "BurstInferno": lambda x: "\"BurstInferno\" Activated Effect not yet implemented.",
+    "ChangeSkin": lambda x: "\"ChangeSkin\" Activated Effect not yet implemented.",
+    "ChristmasPopper": lambda x: "\"ChristmasPopper\" Activated Effect not yet implemented.",
+    "ClearConditionEffectAura": lambda x: "\"ClearConditionEffectAura\" Activated Effect not yet implemented.",
+    "ClearConditionEffectSelf": lambda x: "\"ClearConditionEffectSelf\" Activated Effect not yet implemented.",
+    "ConditionEffectAura": lambda x: "\"ConditionEffectAura\" Activated Effect not yet implemented.",
+    "ConditionEffectSelf": lambda x: "\"ConditionEffectSelf\" Activated Effect not yet implemented.",
+    "Create": lambda x: "\"Create\" Activated Effect not yet implemented.",
+    "CreateGauntlet": lambda x: "\"CreateGauntlet\" Activated Effect not yet implemented.",
+    "CreatePet": lambda x: "\"CreatePet\" Activated Effect not yet implemented.",
+    "CrimsonBox": lambda x: "\"CrimsonBox\" Activated Effect not yet implemented.",
+    "DDiceActivate": lambda x: "\"DDiceActivate\" Activated Effect not yet implemented.",
+    "DamageNova": lambda x: "\"DamageNova\" Activated Effect not yet implemented.",
+    "DareFistBox": lambda x: "\"DareFistBox\" Activated Effect not yet implemented.",
+    "DazeBlast": lambda x: "\"DazeBlast\" Activated Effect not yet implemented.",
+    "Decoy": lambda x: "\"Decoy\" Activated Effect not yet implemented.",
+    "Dice": lambda x: "\"Dice\" Activated Effect not yet implemented.",
+    "DiceActivate": lambda x: "\"DiceActivate\" Activated Effect not yet implemented.",
+    "Drake": lambda x: "\"Drake\" Activated Effect not yet implemented.",
+    "DreamEssenceActivate": lambda x: "\"DreamEssenceActivate\" Activated Effect not yet implemented.",
+    "DualShoot": lambda x: "\"DualShoot\" Activated Effect not yet implemented.",
+    "Dye": lambda x: "\"Dye\" Activated Effect not yet implemented.",
+    "EffectRandom": lambda x: "\"EffectRandom\" Activated Effect not yet implemented.",
     "FUnlockPortal": lambda x: "Unlocks a {}.".format(x["lockedName"]),
-    "Fame": lambda x: "Activated effect not yet implemented.",
-    "FameActivate": lambda x: "Activated effect not yet implemented.",
-    "FixedStat": lambda x: "Activated effect not yet implemented.",
-    "GPBox": lambda x: "Activated effect not yet implemented.",
-    "GenericActivate": lambda x: "Activated effect not yet implemented.",
-    "Gift": lambda x: "Activated effect not yet implemented.",
-    "Halo": lambda x: "Activated effect not yet implemented.",
-    "Heal": lambda x: "Activated effect not yet implemented.",
-    "Heal2": lambda x: "Activated effect not yet implemented.",
+    "Fame": lambda x: "\"Fame\" Activated Effect not yet implemented.",
+    "FameActivate": lambda x: "\"FameActivate\" Activated Effect not yet implemented.",
+    "FixedStat": lambda x: "\"FixedStat\" Activated Effect not yet implemented.",
+    "GPBox": lambda x: "\"GPBox\" Activated Effect not yet implemented.",
+    "GenericActivate": lambda x: "\"GenericActivate\" Activated Effect not yet implemented.",
+    "Gift": lambda x: "\"Gift\" Activated Effect not yet implemented.",
+    "Halo": lambda x: "\"Halo\" Activated Effect not yet implemented.",
+    "Heal": lambda x: "\"Heal\" Activated Effect not yet implemented.",
+    "Heal2": lambda x: "\"Heal2\" Activated Effect not yet implemented.",
     "HealNova": lambda x: "Heals {} HP within {} tiles. {}".format(x["amount"], float(x["range"]), wisMod(x)),
-    "HealNovaSigil": lambda x: "Activated effect not yet implemented.",
-    "HealingGrenade": lambda x: "Activated effect not yet implemented.",
-    "HeldEffect": lambda x: "Activated effect not yet implemented.",
-    "IdScroll": lambda x: "Activated effect not yet implemented.",
+    "HealNovaSigil": lambda x: "\"HealNovaSigil\" Activated Effect not yet implemented.",
+    "HealingGrenade": lambda x: "\"HealingGrenade\" Activated Effect not yet implemented.",
+    "HeldEffect": lambda x: "\"HeldEffect\" Activated Effect not yet implemented.",
+    "IdScroll": lambda x: "\"IdScroll\" Activated Effect not yet implemented.",
     "IncrementStat": lambda x: "Permanently increases {} by {}.".format(statName(x["stat"]), x["amount"]),
-    "InsigniaActivate": lambda x: "Activated effect not yet implemented.",
-    "JacketAbility": lambda x: "Activated effect not yet implemented.",
-    "JacketAbility2": lambda x: "Activated effect not yet implemented.",
-    "LDBoost": lambda x: "Activated effect not yet implemented.",
-    "LTBoost": lambda x: "Activated effect not yet implemented.",
-    "Lightning": lambda x: "Activated effect not yet implemented.",
-    "LootboxActivate": lambda x: "Activated effect not yet implemented.",
-    "Magic": lambda x: "Activated effect not yet implemented.",
-    "Magic2": lambda x: "Activated effect not yet implemented.",
-    "MagicNova": lambda x: "Activated effect not yet implemented.",
-    "MarksActivate": lambda x: "Activated effect not yet implemented.",
-    "MayhemBox": lambda x: "Activated effect not yet implemented.",
-    "MiniPot": lambda x: "Activated effect not yet implemented.",
-    "MonsterToss": lambda x: "Activated effect not yet implemented.",
-    "MultiDecoy": lambda x: "Activated effect not yet implemented.",
-    "Mushroom": lambda x: "Activated effect not yet implemented.",
-    "MysteryDyes": lambda x: "Activated effect not yet implemented.",
-    "MysteryPortal": lambda x: "Activated effect not yet implemented.",
-    "NeonBox": lambda x: "Activated effect not yet implemented.",
-    "NewCharSlot": lambda x: "Activated effect not yet implemented.",
-    "OPBUFF": lambda x: "Activated effect not yet implemented.",
-    "OnraneActivate": lambda x: "Activated effect not yet implemented.",
-    "PLootboxActivate": lambda x: "Activated effect not yet implemented.",
-    "PartyAOE": lambda x: "Activated effect not yet implemented.",
-    "PearlAbility": lambda x: "Activated effect not yet implemented.",
-    "PermaPet": lambda x: "Activated effect not yet implemented.",
-    "Pet": lambda x: "Activated effect not yet implemented.",
-    "PetSkin": lambda x: "Activated effect not yet implemented.",
-    "PetStoneActivate": lambda x: "Activated effect not yet implemented.",
-    "PoZPage": lambda x: "Activated effect not yet implemented.",
-    "PoisonGrenade": lambda x: "Activated effect not yet implemented.",
-    "PowerStat": lambda x: "Activated effect not yet implemented.",
-    "RageReapBox": lambda x: "Activated effect not yet implemented.",
-    "RandomCurrency": lambda x: "Activated effect not yet implemented.",
-    "RandomGold": lambda x: "Activated effect not yet implemented.",
-    "RandomKantos": lambda x: "Activated effect not yet implemented.",
-    "RandomOnrane": lambda x: "Activated effect not yet implemented.",
-    "RemoveNegativeConditions": lambda x: "Activated effect not yet implemented.",
-    "RemoveNegativeConditionsSelf": lambda x: "Activated effect not yet implemented.",
-    "RenamePet": lambda x: "Activated effect not yet implemented.",
-    "RevivementBox": lambda x: "Activated effect not yet implemented.",
-    "RoyalTrap": lambda x: "Activated effect not yet implemented.",
-    "SacredActivate": lambda x: "Activated effect not yet implemented.",
-    "SamuraiAbility": lambda x: "Activated effect not yet implemented.",
-    "Shoot": lambda x: "Activated effect not yet implemented.",
+    "InsigniaActivate": lambda x: "\"InsigniaActivate\" Activated Effect not yet implemented.",
+    "JacketAbility": lambda x: "\"JacketAbility\" Activated Effect not yet implemented.",
+    "JacketAbility2": lambda x: "\"JacketAbility2\" Activated Effect not yet implemented.",
+    "LDBoost": lambda x: "\"LDBoost\" Activated Effect not yet implemented.",
+    "LTBoost": lambda x: "\"LTBoost\" Activated Effect not yet implemented.",
+    "Lightning": lambda x: "\"Lightning\" Activated Effect not yet implemented.",
+    "LootboxActivate": lambda x: "\"LootboxActivate\" Activated Effect not yet implemented.",
+    "Magic": lambda x: "\"Magic\" Activated Effect not yet implemented.",
+    "Magic2": lambda x: "\"Magic2\" Activated Effect not yet implemented.",
+    "MagicNova": lambda x: "\"MagicNova\" Activated Effect not yet implemented.",
+    "MarksActvate": lambda x: "\"MarksActivate\" Activated Effect not yet implemented.",
+    "MayhemBox": lambda x: "\"MayhemBox\" Activated Effect not yet implemented.",
+    "MiniPot": lambda x: "\"MiniPot\" Activated Effect not yet implemented.",
+    "MonsterToss": lambda x: "\"MonsterToss\" Activated Effect not yet implemented.",
+    "MultiDecoy": lambda x: "\"MultiDecoy\" Activated Effect not yet implemented.",
+    "Mushroom": lambda x: "\"Mushroom\" Activated Effect not yet implemented.",
+    "MysteryDyes": lambda x: "\"MysteryDyes\" Activated Effect not yet implemented.",
+    "MysteryPortal": lambda x: "\"MysteryPortal\" Activated Effect not yet implemented.",
+    "NeonBox": lambda x: "\"NeonBox\" Activated Effect not yet implemented.",
+    "NewCharSlot": lambda x: "\"NewCharSlot\" Activated Effect not yet implemented.",
+    "OPBUFF": lambda x: "\"OPBUFF\" Activated Effect not yet implemented.",
+    "OnraneActivate": lambda x: "\"OnraneActivate\" Activated Effect not yet implemented.",
+    "PLootboxActivate": lambda x: "\"PLootboxActivate\" Activated Effect not yet implemented.",
+    "PartyAOE": lambda x: "\"PartyAOE\" Activated Effect not yet implemented.",
+    "PearlAbility": lambda x: "\"PearlAbility\" Activated Effect not yet implemented.",
+    "PermaPet": lambda x: "\"PermaPet\" Activated Effect not yet implemented.",
+    "Pet": lambda x: "\"Pet\" Activated Effect not yet implemented.",
+    "PetSkin": lambda x: "\"PetSkin\" Activated Effect not yet implemented.",
+    "PetStoneActivate": lambda x: "\"PetStoneActivate\" Activated Effect not yet implemented.",
+    "PoZPage": lambda x: "\"PoZPage\" Activated Effect not yet implemented.",
+    "PoisonGrenade": lambda x: "\"PoisonGrenade\" Activated Effect not yet implemented.",
+    "PowerStat": lambda x: "\"PowerStat\" Activated Effect not yet implemented.",
+    "RageReapBox": lambda x: "\"RageReapBox\" Activated Effect not yet implemented.",
+    "RandomCurrency": lambda x: "\"RandomCurrency\" Activated Effect not yet implemented.",
+    "RandomGold": lambda x: "\"RandomGold\" Activated Effect not yet implemented.",
+    "RandomKantos": lambda x: "\"RandomKantos\" Activated Effect not yet implemented.",
+    "RandomOnrane": lambda x: "\"RandomOnrane\" Activated Effect not yet implemented.",
+    "RemoveNegativeConditions": lambda x: "\"RemoveNegativeConditions\" Activated Effect not yet implemented.",
+    "RemoveNegativeConditionsSelf": lambda x: "\"RemoveNegativeConditionsSelf\" Activated Effect not yet implemented.",
+    "RenamePet": lambda x: "\"RenamePet\" Activated Effect not yet implemented.",
+    "RevivementBox": lambda x: "\"RevivementBox\" Activated Effect not yet implemented.",
+    "RoyalTrap": lambda x: "\"RoyalTrap\" Activated Effect not yet implemented.",
+    "SacredActivate": lambda x: "\"SacredActivate\" Activated Effect not yet implemented.",
+    "SamuraiAbility": lambda x: "\"SamuraiAbility\" Activated Effect not yet implemented.",
+    "Shoot": lambda x: "\"Shoot\" Activated Effect not yet implemented.",
     "ShootEff": lambda x: "Unused Activated Effect \"ShootEff\".",
-    "ShurikenAbility": lambda x: "Activated effect not yet implemented.",
+    "ShurikenAbility": lambda x: "\"ShurikenAbility\" Activated Effect not yet implemented.",
     "SilentBox": lambda x: "Unused Activated Effect \"SilentBox\".",
-    "SiphonAbility": lambda x: "Activated effect not yet implemented.",
+    "SiphonAbility": lambda x: "\"SiphonAbility\" Activated Effect not yet implemented.",
+
     "SorConstruct": lambda x: "Constructs a Sor Crystal.",
     "SorForge": lambda x: "Ascends this item to a Legendary Sor Crystal.",
     "SorMachine": lambda x: "Transforms a Legendary Sor Crystal into a useful item.",
     "SpecialPet": lambda x: "Unused Activated Effect \"SpecialPet\".",
-    "SpiderTrap": lambda x: "Activated effect not yet implemented.",
+    "SpiderTrap": lambda x: "\"SpiderTrap\" Activated Effect not yet implemented.",
     "StasisBlast": lambda x: "Effect on enemies: Within 3 tiles, Stasis for {} seconds. Centered around the player's cursor.".format(x["duration"]),
     "StatBoostAura": lambda x: "Effect on party: Within {} tiles, {:+d} {} for {} seconds. {}".format(x["range"], int(x["amount"]), statName(x["stat"]), x["duration"], wisMod(x)),
     "StatBoostSelf": lambda x: "Effect on self: {:+d} {} for {} seconds. {}".format(int(x["amount"]), statName(x["stat"]), x["duration"], wisMod(x)),
     "Summon": lambda x: "Unused Activated Effect \"Summon\".",
     "SunshineBox": lambda x: "Unused Activated Effect \"SunshineBox\".",
-    "TalismanAbility": lambda x: "Activated effect not yet implemented.",
+    "TalismanAbility": lambda x: "\"TalismanAbility\" Activated Effect not yet implemented.",
     "Teleport": lambda x: "Teleports the player to the cursor, with a maximum distance of {}.".format(x["maxDistance"]),
     "TomeDamage": lambda x: "Unused Activated Effect \"TomeDamage\".",
-    "Torii": lambda x: "Activated effect not yet implemented.",
+    "Torii": lambda x: "\"Torii\" Activated Effect not yet implemented.",
     "Totem": lambda x: "Unused Activated Effect \"Totem\".",
-    "Trap": lambda x: "Activated effect not yet implemented.",
+    "Trap": lambda x: "\"Trap\" Activated Effect not yet implemented.",
     "TreasureActivate": lambda x: "Grants the player {} gold.".format(x["amount"]),
     "URandomOnrane": lambda x: "Grants the player 12, 14, 16, 18, or 20 onrane.",
     "UnScroll": lambda x: "Unused Activated Effect \"UnScroll\".",
