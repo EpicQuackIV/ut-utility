@@ -21,7 +21,7 @@ cond = lambda x: x.Sacred or x.Legendary or x.RT
 fout = open("something/ut-utility/output/xml-parser.txt", "r+")
 itemList = GetItems("something/ut-core-master/server/common/resources/xmls/client/dat1.xml", cond)
 fout.truncate(0)
-lout2 = [i.Id for i in itemList if cond(i)]
-lout2.sort()
-fout.write("\n".join(lout2))
+lout2 = [str(i) for i in itemList if True]
+#lout2.sort()
+fout.write("\n\n".join(lout2))
 fout.close()

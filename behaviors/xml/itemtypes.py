@@ -40,27 +40,14 @@ class Item():
 
     def __str__(this):
         try:
-            ret = this.Id + "\n"
-            ret += "Object Type " + hex(this.ObjType) + "\n"
-            ret += this.Description + "\n" if this.Description else ""
-            if (this.ActivateOnEquip):
-                ret += "\nWhile equipped:\n"
-                aes = []
-                for ae in this.ActivateOnEquip:
-                    aes.append(aoeformatter.get(ae[0], lambda x: "Unknown AE \"" + ae[0] + "\" on item \"" + this.Id + "\"")(ae[1]))
-                aes.sort()
-                ret += "\n".join(aes) + "\n"
-
-            if (this.Activate):
-                ret += "\nWhen used:\n"
-                aes = []
-                for ae in this.Activate:
-                    aes.append(aeformatter.get(ae[0], lambda x: "Unknown AE \"" + ae[0] + "\" on item \"" + this.Id + "\"")(ae[1]))
-                aes.sort()
-                ret += "\n".join(aes) + "\n"
-            return ret
+            ret = [this.Id]
+            ret.append("Object Type " + hex(this.ObjType))
+            if (this.Description != None):
+                ret.append(this.Description)
+            ret.append(this.makeActivateText())
+            return "\n".join(ret)
         except:
-            return "Error when converting \"" + this.Id + "\" to string.\n"
+            return "\nError when converting \"" + this.Id + "\" to string.\n"
 
     def set(this, variableName, value):
         setattr(this, str(variableName), value)
@@ -68,7 +55,26 @@ class Item():
     def get(this, variableName):
         return getattr(this, variableName)
 
+    def makeActivateText(this):
+        ret = []
 
+        if (len(this.ActivateOnEquip) > 0):
+            aoes = []
+            for aoe in this.ActivateOnEquip:
+                aoes.append(aoeformatter.get(aoe[0], lambda x: "Unknown Effect \"" + aoe[0] + "\" on item \"" + this.Id + "\"")(aoe[1]))
+            aoes.sort()
+            aoes.insert(0, "While equipped:")
+            ret.append("\n".join(aoes))
+
+        if (len(this.Activate) > 0):
+            aes = []
+            for ae in this.Activate:
+                aes.append(aeformatter.get(ae[0], lambda x: "Unknown Effect \"" + ae[0] + "\" on item \"" + this.Id + "\"")(ae[1]))
+            aes.sort()
+            aes.insert(0, "When used:")
+            ret.append("\n".join(aes))
+
+        return "\n".join(ret)
 
 
 
