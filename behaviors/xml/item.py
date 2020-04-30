@@ -3,7 +3,6 @@ from itemtypes import *
 
 class Item():
 
-    Item = True
     Description = None
     NumProjectiles = 0
     Tier = -1
