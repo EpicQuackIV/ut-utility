@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
-from itemtypes import *#slot2type
+from item import Item
+from itemtypes import SlotToSlotType
 
 
 def GetItems(path, addCondition):
