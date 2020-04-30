@@ -113,7 +113,7 @@ StatIDToName = {
     "122": "Protection",
 }
 
-statName = lambda x: statid2name.get(x, "unknown stat")
+statName = lambda x: StatIDToName.get(x, "unknown stat")
 wisMod = lambda x: "Uses wis mod." if x.get("useWisMod", "") == "true" else "Does not use wis mod."
 
 # Always capitalize the sentence and put punctuation at the end.
@@ -237,7 +237,7 @@ AEFormatter = {
     "Summon": lambda x: "Unused Activated Effect \"Summon\".",
     "SunshineBox": lambda x: "Unused Activated Effect \"SunshineBox\".",
     "TalismanAbility": lambda x: "\"TalismanAbility\" Activated Effect not yet implemented.",
-    "Teleport": lambda x: "Teleports the player to the cursor, with a maximum distance of {}.".format(x["maxDistance"]),
+    "Teleport": lambda x: "Teleports the player to the cursor, with a maximum distance of {} tiles.".format(x["maxDistance"]),
     "TomeDamage": lambda x: "Unused Activated Effect \"TomeDamage\".",
     "Torii": lambda x: "\"Torii\" Activated Effect not yet implemented.",
     "Totem": lambda x: "Unused Activated Effect \"Totem\".",
@@ -260,5 +260,5 @@ AEFormatter = {
 # Always capitalize the sentence and put punctuation at the end.
 AOEFormatter = {
     "IncrementStat": lambda x: "{:+d} {}".format(int(x["amount"]), statName(x["stat"])),
-    #only one activateonequip, kinda boring
+    "EffectEquip": lambda x: "Grants {} after {} seconds.".format(x["effect"], x["delay"])
 }

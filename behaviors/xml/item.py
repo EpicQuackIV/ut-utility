@@ -54,36 +54,36 @@ class Item():
     Treasure = False
     Usable = False
 
-    AnimatedTexture = None
-    EffectEquip = None
     ExtraTooltipData = None
-    Mask = None
-    OldSound = None
     Projectile = None
-    RemoteTexture = None
-    Sound = None
     Texture = None
 
     def __init__(this, itemXml):
-        this.Id = itemXml.attrib["id"]
-        this.ObjType = int(itemXml.attrib["type"], 16)
+        this.Id = itemXml.get("id")
+        this.ObjType = int(itemXml.get("type"), 16)
         this.Activate = [] # # List<Tuple<string, Dict<string, string>>>
         this.ActivateOnEquip = [] # List<Tuple<string, Dict<string, string>>>
+        this.ExtraTooltipData = None
+        this.Projectile = None
+        this.Texture = None
 
         for element in itemXml:
             SetElementData(this, element)
 
     def __str__(this):
         try:
-            ret = [this.Id]
-            ret.append("Object Type " + hex(this.ObjType))
+            ret = [this.Id + " [" + hex(this.ObjType) + "]"]
             if (this.Description != None):
-                ret.append(this.Description)
+                ret.append("\"" + this.Description + "\"")
+            if (this.ExtraTooltipData != None):
+                ret.append(str(this.ExtraTooltipData))
+            if (this.Projectile != None):
+                ret.append(str(this.Projectile))
             if (len(this.Activate) > 0 or len(this.ActivateOnEquip) > 0):
                 ret.append(this.makeActivateText())
             return "\n".join(ret) + "\n"
-        except:
-            return "Error when converting \"" + this.Id + "\" to string.\n"
+        except Exception as e:
+            return "Error when converting \"" + this.Id + "\" to string:\n" + str(e)
 
     def set(this, variableName, value):
         setattr(this, str(variableName), value)
