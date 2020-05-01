@@ -24,6 +24,19 @@ class Texture():
             this.Index = int(xml.get("Index") or 0)
 
 
+class Legend():
+
+    Name = ""
+    Description = ""
+
+    def __init__(this, xml):
+        this.Name = xml.find("Name").text
+        this.Description = xml.find("Description").text
+
+    def __str__(this):
+        return this.Name + ": " + this.Description
+
+
 class ExtraTooltipData():
 
     def __init__(this, xml):
@@ -121,7 +134,7 @@ class Projectile():
                 ret.append("Shoots " + str(this.Item.NumProjectiles) + " shots at a " + str(this.Item.ArcGap) + " degree angle.")
             else:
                 ret.append("Shoots 1 shot.")
-        ret.append(str(round(this.Speed * this.LifetimeMS * (0.00005 if this.Boomerang else 0.0001), 2)) + " tile range.")
+        ret.append("Range: " + str(round(this.Speed * this.LifetimeMS * (0.00005 if this.Boomerang else 0.0001), 2)) + " tiles.")
         if (this.Amplitude > 0):
             ret.append("Shots have an amplitude of " + str(round(this.Amplitude, 2)) + " tiles and a frequency of " + str(round(this.Frequency)) + ".")
         if (this.MultiHit):
@@ -176,7 +189,7 @@ def _XmlToExtraTooltipData(item, xml):
     pass
 
 def _XmlToLegend(item, xml):
-    item.set("LegendID", int(xml.get("id")))
+    item.set("Legend", Legend(xml))
 
 def _XmlToProjectile(item, xml):
     prj = Projectile(xml)
@@ -186,7 +199,7 @@ def _XmlToProjectile(item, xml):
 
 def _XmlToSacred(item, xml):
     item.set("Sacred", True)
-    item.set("SacredDesc", int(xml.get("desc")))
+    item.set("SacredID", int(xml.get("desc")))
 
 def _XmlToSteal(item, xml):
     if (xml.get("type") == "life"):

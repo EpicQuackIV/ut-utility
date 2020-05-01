@@ -2,6 +2,20 @@
 
 # todo: this file needs to be renamed. slots and stats and activated effects aren't item types.
 
+SacredIDToDesc = {
+    0: "Runic Offense: On hit, 8% chance to trigger an AOE damage for 1.5x of taken damage with a 4 tile radius. Stackable.",
+    1: "Runic Defense: On hit, 8% chance to trigger an AOE heal for the taken damage with a 4 tile radius. Stackable.",
+    2: "Enhanced Growth: Health regeneration is increased by 10% and maximum health is increased by 5%. Stackable.",
+    3: "Open Mind: Mana regeneration is increased by 10% and maximum mana is increased by 5%. Stackable.",
+    4: "Treasure Hunter: On loot roll, 8% chance to apply a 100% drop chance increase. Stackable.",
+    5: "Adrenaline Rush: On hit, 8% chance to ignore incoming damage. Stackable.",
+    6: "Arcane Grace: On ability use, 7% chance to not use any mana. Stackable.",
+    7: "Helping Hand: On ability use, 7% chance to remove 1 negative effect per player in a 3 tile radius. Stackable.",
+    8: "Galactic Valor: All status effect durations are increased by 5%. Stackable.",
+    9: "Collector's Edition: All stats are increased by 0.75% per sacred item in inventory. Stackable.",
+    10: "Critical Focus: On enemy hit, 7% increase might by 10% of total luck. Stackable."
+}
+
 SlotToCategory = {
     1 : "weapon", # sword
     2 : "weapon", # dagger
@@ -259,6 +273,6 @@ AEFormatter = {
 
 # Always capitalize the sentence and put punctuation at the end.
 AOEFormatter = {
-    "IncrementStat": lambda x: "{:+d} {}".format(int(x["amount"]), statName(x["stat"])),
+    "IncrementStat": lambda x: "{:+d} {}.".format(int(x["amount"]), statName(x["stat"])),
     "EffectEquip": lambda x: "Grants {} after {} seconds.".format(x["effect"], x["delay"])
 }
