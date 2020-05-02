@@ -24,5 +24,5 @@ itemList = GetItems("something/ut-core-master/server/common/resources/xmls/clien
 fout.truncate(0)
 lout2 = [str(i) for i in itemList if True]
 #lout2.sort()
-fout.write("\n\n".join(lout2))
+fout.write("\n==================\n\n".join(lout2))
 fout.close()
