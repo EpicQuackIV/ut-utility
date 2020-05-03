@@ -8,7 +8,7 @@ Dictionary<string, string> behaviors
 List<string> states
 List<string> transitions
 '''
-import utils as u
+import behaviors.utils as u
 from glob import glob
 class Behavior:
 
@@ -59,7 +59,6 @@ def TrimBehaviorLine(src):
 
 def GetBehaviors(src):
     '''Returns an array of behaviors, parsed from the src parameter.'''
-    from behavior import Behavior
     ret = []
     behavs = src.split(".Init")[1:]
     for enemyBehav in behavs:
@@ -100,11 +99,11 @@ def GetLootAndPerc(behavs, excludeCondition):
             shortList += "\t" + loot[0] + ", " + str(round(loot[1] * 100, 3)) + "%\n"
 
         if shortList != "":
-            bigList += behav.host + ":\n" + shortList
+            ret += behav.host + ":\n" + shortList
 
-    return bigList
+    return ret
 
-def GetAllDrops(behavs, exclude):
+def GetAllDrops(behavs, exclude=[]):
     '''
     Params: Behavior[] behavs, string[] exclude
     Returns: string[]
@@ -112,11 +111,7 @@ def GetAllDrops(behavs, exclude):
     '''
     ret = []
     for behav in behavs:
-        #select only itemloot behaviors
-        loots = behav.BehaviorsOfType("ItemLoot");
-        # add and format the enemy's name and loot to  the output string
-        if len(loots) == 0:
-            continue
+        loots = behav.BehaviorsOfType("ItemLoot")
         for loot in loots:
             if loot[0] in exclude or loot[0] in ret:
                 continue

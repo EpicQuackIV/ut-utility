@@ -1,5 +1,20 @@
-from xmltags import SetElementData
-from itemtypes import *
+from items.xmltags import SetElementData
+from items.itemtypes import *
+import xml.etree.ElementTree as ET
+
+def GetItems(path):
+    '''
+    Params: string path
+    Returns: list<Item>
+    Returns a list of every item found in the xml file found at path.
+    '''
+    xmlData = ET.parse(path).getroot()
+    ret = []
+    for xml in xmlData.findall(".//Object[Item]"):
+        ret.append(Item(xml))
+
+    print (len(ret))
+    return ret
 
 class Item():
 

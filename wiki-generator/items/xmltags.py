@@ -1,4 +1,4 @@
-from itemtypes import SlotToCategory
+from items.itemtypes import SlotToCategory
 
 
 def _InvalidTag(item, xml):
@@ -136,7 +136,7 @@ class Projectile():
                 ret.append("Shoots 1 shot.")
         ret.append("Range: " + str(round(this.Speed * this.LifetimeMS * (0.00005 if this.Boomerang else 0.0001), 2)) + " tiles.")
         if (this.Amplitude > 0):
-            ret.append("Shots have an amplitude of " + str(round(this.Amplitude, 2)) + " tiles and a frequency of " + str(round(this.Frequency)) + ".")
+            ret.append("Shots have an amplitude of " + str(round(this.Amplitude, 2)) + " and a frequency of " + str(round(this.Frequency)) + ".")
         if (this.MultiHit):
             ret.append("Shots hit multiple targets.")
         if (this.PassesCover):
