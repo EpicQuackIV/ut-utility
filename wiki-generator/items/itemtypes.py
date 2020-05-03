@@ -130,8 +130,17 @@ StatIDToName = {
 statName = lambda x: StatIDToName.get(x, "unknown stat")
 wisMod = lambda x: "Uses wis mod." if x.get("useWisMod", "") == "true" else "Does not use wis mod."
 unusedAE = lambda eff: "Unused Activated Effect: " + eff + "."
+emptyAE = ""
+
+
 
 # Always capitalize the sentence and put punctuation at the end.
+AOEFormatter = {
+    "IncrementStat": lambda x: "{:+d} {}.".format(int(x["amount"]), statName(x["stat"])),
+    "EffectEquip": lambda x: "Grants {} after {} seconds.".format(x["effect"], x["delay"])
+}
+
+# Alays capitalize the sentence and put punctuation at the end.
 AEFormatter = {
     # unused activated effects
     "AbbyConstruct": lambda x: unusedAE("AbbyConstruct"),
@@ -185,98 +194,265 @@ AEFormatter = {
     "VorvBox": lambda x: unusedAE("VorvBox"),
     "WARPAWNBUFF": lambda x: unusedAE("WARPAWNBUFF"),
     "WigWeekBox": lambda x: unusedAE("WigWeekBox"),
+    "WorldBossActivate": lambda x: unusedAE("WorldBossActivate"),
 
 
-    "ActivateFragment": lambda x: "\"ActivateFragment\" Activated Effect not yet implemented.",
-    "AscensionActivate": lambda x: "\"AscensionActivate\" Activated Effect not yet implemented.",
-    "AsiHeal": lambda x: "\"AsiHeal\" Activated Effect not yet implemented.",
-    "AstonAbility": lambda x: "\"AstonAbility\" Activated Effect not yet implemented.",
-    "Backpack": lambda x: "\"Backpack\" Activated Effect not yet implemented.",
-    "Banner": lambda x: "\"Banner\" Activated Effect not yet implemented.",
-    "BlackScroll": lambda x: "\"BlackScroll\" Activated Effect not yet implemented.",
-    "BrownScroll": lambda x: "\"BrownScroll\" Activated Effect not yet implemented.",
-    "BuildTower": lambda x: "\"BuildTower\" Activated Effect not yet implemented.",
-    "BulletNova": lambda x: "\"BulletNova\" Activated Effect not yet implemented.",
-    "BulletNova2": lambda x: "\"BulletNova2\" Activated Effect not yet implemented.",
-    "BurstInferno": lambda x: "\"BurstInferno\" Activated Effect not yet implemented.",
-    "ClearConditionEffectAura": lambda x: "\"ClearConditionEffectAura\" Activated Effect not yet implemented.",
-    "ClearConditionEffectSelf": lambda x: "\"ClearConditionEffectSelf\" Activated Effect not yet implemented.",
-    "ConditionEffectAura": lambda x: "\"ConditionEffectAura\" Activated Effect not yet implemented.",
-    "ConditionEffectSelf": lambda x: "\"ConditionEffectSelf\" Activated Effect not yet implemented.",
-    "Create": lambda x: "\"Create\" Activated Effect not yet implemented.",
-    "CreateGauntlet": lambda x: "\"CreateGauntlet\" Activated Effect not yet implemented.",
-    "CreatePet": lambda x: "\"CreatePet\" Activated Effect not yet implemented.",
-    "DDiceActivate": lambda x: "\"DDiceActivate\" Activated Effect not yet implemented.",
-    "DamageNova": lambda x: "\"DamageNova\" Activated Effect not yet implemented.",
-    "Decoy": lambda x: "\"Decoy\" Activated Effect not yet implemented.",
-    "Dice": lambda x: "\"Dice\" Activated Effect not yet implemented.",
-    "DiceActivate": lambda x: "\"DiceActivate\" Activated Effect not yet implemented.",
-    "DreamEssenceActivate": lambda x: "\"DreamEssenceActivate\" Activated Effect not yet implemented.",
-    "Dye": lambda x: "\"Dye\" Activated Effect not yet implemented.",
-    "EffectRandom": lambda x: "\"EffectRandom\" Activated Effect not yet implemented.",
-    "FUnlockPortal": lambda x: "Unlocks a {}.".format(x["lockedName"]),
-    "FameActivate": lambda x: "\"FameActivate\" Activated Effect not yet implemented.",
-    "GenericActivate": lambda x: "\"GenericActivate\" Activated Effect not yet implemented.",
-    "Gift": lambda x: "\"Gift\" Activated Effect not yet implemented.",
-    "Heal": lambda x: "\"Heal\" Activated Effect not yet implemented.",
-    "Heal2": lambda x: "\"Heal2\" Activated Effect not yet implemented.",
-    "HealNova": lambda x: "Heals {} HP within {} tiles. {}".format(x["amount"], float(x["range"]), wisMod(x)),
-    "HealNovaSigil": lambda x: "\"HealNovaSigil\" Activated Effect not yet implemented.",
-    "IncrementStat": lambda x: "Permanently increases {} by {}.".format(statName(x["stat"]), x["amount"]),
-    "InsigniaActivate": lambda x: "\"InsigniaActivate\" Activated Effect not yet implemented.",
-    "JacketAbility": lambda x: "\"JacketAbility\" Activated Effect not yet implemented.",
-    "JacketAbility2": lambda x: "\"JacketAbility2\" Activated Effect not yet implemented.",
-    "LDBoost": lambda x: "\"LDBoost\" Activated Effect not yet implemented.",
-    "LTBoost": lambda x: "\"LTBoost\" Activated Effect not yet implemented.",
-    "Lightning": lambda x: "\"Lightning\" Activated Effect not yet implemented.",
-    "LootboxActivate": lambda x: "\"LootboxActivate\" Activated Effect not yet implemented.",
-    "Magic": lambda x: "\"Magic\" Activated Effect not yet implemented.",
-    "Magic2": lambda x: "\"Magic2\" Activated Effect not yet implemented.",
-    "MagicNova": lambda x: "\"MagicNova\" Activated Effect not yet implemented.",
-    "MarksActivate": lambda x: "\"MarksActivate\" Activated Effect not yet implemented.",
-    "MysteryPortal": lambda x: "\"MysteryPortal\" Activated Effect not yet implemented.",
-    "OPBUFF": lambda x: "\"OPBUFF\" Activated Effect not yet implemented.",
-    "OnraneActivate": lambda x: "\"OnraneActivate\" Activated Effect not yet implemented.",
-    "PermaPet": lambda x: "\"PermaPet\" Activated Effect not yet implemented.",
-    "Pet": lambda x: "\"Pet\" Activated Effect not yet implemented.",
-    "PetStoneActivate": lambda x: "\"PetStoneActivate\" Activated Effect not yet implemented.",
-    "PoisonGrenade": lambda x: "\"PoisonGrenade\" Activated Effect not yet implemented.",
-    "PowerStat": lambda x: "\"PowerStat\" Activated Effect not yet implemented.",
-    "RandomCurrency": lambda x: "\"RandomCurrency\" Activated Effect not yet implemented.",
-    "RandomGold": lambda x: "\"RandomGold\" Activated Effect not yet implemented.",
-    "RandomOnrane": lambda x: "\"RandomOnrane\" Activated Effect not yet implemented.",
-    "RemoveNegativeConditions": lambda x: "\"RemoveNegativeConditions\" Activated Effect not yet implemented.",
-    "RemoveNegativeConditionsSelf": lambda x: "\"RemoveNegativeConditionsSelf\" Activated Effect not yet implemented.",
-    "RoyalTrap": lambda x: "\"RoyalTrap\" Activated Effect not yet implemented.",
-    "SacredActivate": lambda x: "Grants the player {} sacred fragments.".format(x["amount"]),
-    "SamuraiAbility": lambda x: "\"SamuraiAbility\" Activated Effect not yet implemented.",
-    "Shoot": lambda x: "\"Shoot\" Activated Effect not yet implemented.",
-    "ShurikenAbility": lambda x: "\"ShurikenAbility\" Activated Effect not yet implemented.",
-    "SiphonAbility": lambda x: "\"SiphonAbility\" Activated Effect not yet implemented.",
+    "SamuraiAbility": lambda x: emptyAE,
+    "Shoot": lambda x: emptyAE,
+    "ShurikenAbility": lambda x: emptyAE,
+    "SiphonAbility": lambda x: emptyAE,
 
-    "SorConstruct": lambda x: "Constructs a Sor Crystal.",
-    "SorForge": lambda x: "Ascends this item to a Legendary Sor Crystal.",
-    "SorMachine": lambda x: "Transforms a Legendary Sor Crystal into a useful item.",
-    "SpiderTrap": lambda x: "\"SpiderTrap\" Activated Effect not yet implemented.",
-    "StasisBlast": lambda x: "Effect on enemies: Within 3 tiles, Stasis for {} seconds. Centered around the player's cursor.".format(x["duration"]),
-    "StatBoostAura": lambda x: "Effect on party: Within {} tiles, {:+d} {} for {} seconds. {}".format(x["range"], int(x["amount"]), statName(x["stat"]), x["duration"], wisMod(x)),
-    "StatBoostSelf": lambda x: "Effect on self: {:+d} {} for {} seconds. {}".format(int(x["amount"]), statName(x["stat"]), x["duration"], wisMod(x)),
-    "TalismanAbility": lambda x: "\"TalismanAbility\" Activated Effect not yet implemented.",
-    "Teleport": lambda x: "Teleports the player to the cursor, with a maximum distance of {} tiles.".format(x["maxDistance"]),
-    "Torii": lambda x: "\"Torii\" Activated Effect not yet implemented.",
-    "Trap": lambda x: "\"Trap\" Activated Effect not yet implemented.",
-    "TreasureActivate": lambda x: "Grants the player {} gold.".format(x["amount"]),
-    "URandomOnrane": lambda x: "Grants the player 12, 14, 16, 18, or 20 onrane.",
-    "UnlockEmote": lambda x: "Unlocks the {} emote.".format(x["id"]),
-    "UnlockPortal": lambda x: "Unlocks a {}.".format(x["lockedName"]),
-    "UnlockSkin": lambda x: "Unlocks skin type {}.".format(x["skinType"]),
-    "VampireBlast": lambda x: "Steals {} HP within {} tiles. Centered around the player's cursor.".format(x["totalDamage"], x["radius"]),
-    "WorldBossActivate": lambda x: "\"WorldBossActivate\" Activated Effect not yet implemented.",
-    "XPBoost": lambda x: "Grants a 50% loot boost for {} minutes.".format(int(x["duration"]) / 60)
-}
 
-# Always capitalize the sentence and put punctuation at the end.
-AOEFormatter = {
-    "IncrementStat": lambda x: "{:+d} {}.".format(int(x["amount"]), statName(x["stat"])),
-    "EffectEquip": lambda x: "Grants {} after {} seconds.".format(x["effect"], x["delay"])
+    "ActivateFragment": lambda x:
+        "\"ActivateFragment\" Activated Effect not yet implemented.",
+
+    "AscensionActivate": lambda x:
+        "\"AscensionActivate\" Activated Effect not yet implemented.",
+
+    "AsiHeal": lambda x:
+        "\"AsiHeal\" Activated Effect not yet implemented.",
+
+    "AstonAbility": lambda x:
+        "\"AstonAbility\" Activated Effect not yet implemented.",
+
+    "Backpack": lambda x:
+        "\"Backpack\" Activated Effect not yet implemented.",
+
+    "Banner": lambda x:
+        "\"Banner\" Activated Effect not yet implemented.",
+
+    "BlackScroll": lambda x:
+        "\"BlackScroll\" Activated Effect not yet implemented.",
+
+    "BrownScroll": lambda x:
+        "\"BrownScroll\" Activated Effect not yet implemented.",
+
+    "BuildTower": lambda x:
+        "\"BuildTower\" Activated Effect not yet implemented.",
+
+    "BulletNova": lambda x:
+        "\"BulletNova\" Activated Effect not yet implemented.",
+
+    "BulletNova2": lambda x:
+        "\"BulletNova2\" Activated Effect not yet implemented.",
+
+    "BurstInferno": lambda x:
+        "\"BurstInferno\" Activated Effect not yet implemented.",
+
+    "ClearConditionEffectAura": lambda x:
+        "\"ClearConditionEffectAura\" Activated Effect not yet implemented.",
+
+    "ClearConditionEffectSelf": lambda x:
+        "\"ClearConditionEffectSelf\" Activated Effect not yet implemented.",
+
+    "ConditionEffectAura": lambda x:
+        "\"ConditionEffectAura\" Activated Effect not yet implemented.",
+
+    "ConditionEffectSelf": lambda x:
+        "\"ConditionEffectSelf\" Activated Effect not yet implemented.",
+
+    "Create": lambda x:
+        "\"Create\" Activated Effect not yet implemented.",
+
+    "CreateGauntlet": lambda x:
+        "\"CreateGauntlet\" Activated Effect not yet implemented.",
+
+    "CreatePet": lambda x:
+        "\"CreatePet\" Activated Effect not yet implemented.",
+
+    "DDiceActivate": lambda x:
+        "\"DDiceActivate\" Activated Effect not yet implemented.",
+
+    "DamageNova": lambda x:
+        "\"DamageNova\" Activated Effect not yet implemented.",
+
+    "Decoy": lambda x:
+        "\"Decoy\" Activated Effect not yet implemented.",
+
+    "Dice": lambda x:
+        "\"Dice\" Activated Effect not yet implemented.",
+
+    "DiceActivate": lambda x:
+        "\"DiceActivate\" Activated Effect not yet implemented.",
+
+    "DreamEssenceActivate": lambda x:
+        "\"DreamEssenceActivate\" Activated Effect not yet implemented.",
+
+    "Dye": lambda x:
+        "\"Dye\" Activated Effect not yet implemented.",
+
+    "EffectRandom": lambda x:
+        "\"EffectRandom\" Activated Effect not yet implemented.",
+
+    "FUnlockPortal": lambda x:
+        "Unlocks a {}.".format(x["lockedName"]),
+
+    "FameActivate": lambda x:
+        "\"FameActivate\" Activated Effect not yet implemented.",
+
+    "GenericActivate": lambda x:
+        "\"GenericActivate\" Activated Effect not yet implemented.",
+
+    "Gift": lambda x:
+        "\"Gift\" Activated Effect not yet implemented.",
+
+    "Heal": lambda x:
+        "\"Heal\" Activated Effect not yet implemented.",
+
+    "Heal2": lambda x:
+        "\"Heal2\" Activated Effect not yet implemented.",
+
+    "HealNova": lambda x:
+        "Heals {} HP within {} tiles. {}"
+        .format(x["amount"], float(x["range"]), wisMod(x)),
+
+    "HealNovaSigil": lambda x:
+        "\"HealNovaSigil\" Activated Effect not yet implemented.",
+
+    "IncrementStat": lambda x:
+        "Permanently increases {} by {}."
+        .format(statName(x["stat"]), x["amount"]),
+
+    "InsigniaActivate": lambda x:
+        "\"InsigniaActivate\" Activated Effect not yet implemented.",
+
+    "JacketAbility": lambda x:
+        "\"JacketAbility\" Activated Effect not yet implemented.",
+
+    "JacketAbility2": lambda x:
+        "\"JacketAbility2\" Activated Effect not yet implemented.",
+
+    "LDBoost": lambda x:
+        "\"LDBoost\" Activated Effect not yet implemented.",
+
+    "LTBoost": lambda x:
+        "\"LTBoost\" Activated Effect not yet implemented.",
+
+    "Lightning": lambda x:
+        "\"Lightning\" Activated Effect not yet implemented.",
+
+    "LootboxActivate": lambda x:
+        "\"LootboxActivate\" Activated Effect not yet implemented.",
+
+    "Magic": lambda x:
+        "\"Magic\" Activated Effect not yet implemented.",
+
+    "Magic2": lambda x:
+        "\"Magic2\" Activated Effect not yet implemented.",
+
+    "MagicNova": lambda x:
+        "\"MagicNova\" Activated Effect not yet implemented.",
+
+    "MarksActivate": lambda x:
+        "\"MarksActivate\" Activated Effect not yet implemented.",
+
+    "MysteryPortal": lambda x:
+        "\"MysteryPortal\" Activated Effect not yet implemented.",
+
+    "OPBUFF": lambda x:
+        "\"OPBUFF\" Activated Effect not yet implemented.",
+
+    "OnraneActivate": lambda x:
+        "\"OnraneActivate\" Activated Effect not yet implemented.",
+
+    "PermaPet": lambda x:
+        "\"PermaPet\" Activated Effect not yet implemented.",
+
+    "Pet": lambda x:
+        "\"Pet\" Activated Effect not yet implemented.",
+
+    "PetStoneActivate": lambda x:
+        "\"PetStoneActivate\" Activated Effect not yet implemented.",
+
+    "PoisonGrenade": lambda x:
+        "\"PoisonGrenade\" Activated Effect not yet implemented.",
+
+    "PowerStat": lambda x:
+        "\"PowerStat\" Activated Effect not yet implemented.",
+
+    "RandomCurrency": lambda x:
+        "\"RandomCurrency\" Activated Effect not yet implemented.",
+
+    "RandomGold": lambda x:
+        "\"RandomGold\" Activated Effect not yet implemented.",
+
+    "RandomOnrane": lambda x:
+        "\"RandomOnrane\" Activated Effect not yet implemented.",
+
+    "RemoveNegativeConditions": lambda x:
+        "\"RemoveNegativeConditions\" Activated Effect not yet implemented.",
+
+    "RemoveNegativeConditionsSelf": lambda x:
+        "\"RemoveNegativeConditionsSelf\" Activated Effect not yet implemented.",
+
+    "RoyalTrap": lambda x:
+        "\"RoyalTrap\" Activated Effect not yet implemented.",
+
+    "SacredActivate": lambda x:
+        "Grants the player {} sacred fragments."
+        .format(x["amount"]),
+
+    "SorConstruct": lambda x:
+        "Constructs a Sor Crystal.",
+
+    "SorForge": lambda x:
+        "This item can be ascended into a Legendary Sor Crystal.",
+
+    "SorMachine": lambda x:
+        "Transforms a Legendary Sor Crystal into a useful item.",
+
+    "SpiderTrap": lambda x:
+        "\"SpiderTrap\" Activated Effect not yet implemented.",
+
+    "StasisBlast": lambda x:
+        "Effect on enemies: Within 3 tiles of the player's cursor, Stasis for {} seconds."
+        .format(x["duration"]),
+
+    "StatBoostAura": lambda x:
+        "Effect on party: Within {} tiles, {:+d} {} for {} seconds. {}"
+        .format(x["range"], int(x["amount"]), statName(x["stat"]), x["duration"], wisMod(x)),
+
+    "StatBoostSelf": lambda x:
+        "Effect on self: {:+d} {} for {} seconds. {}"
+        .format(int(x["amount"]), statName(x["stat"]), x["duration"], wisMod(x)),
+
+    "TalismanAbility": lambda x:
+        "\"TalismanAbility\" Activated Effect not yet implemented.",
+
+    "Teleport": lambda x:
+        "Teleports the player to the cursor, with a maximum distance of {} tiles."
+        .format(x["maxDistance"]),
+
+    "Torii": lambda x:
+        "\"Torii\" Activated Effect not yet implemented.",
+
+    "Trap": lambda x:
+        "\"Trap\" Activated Effect not yet implemented.",
+
+    "TreasureActivate": lambda x:
+        "Grants the player {} gold."
+        .format(x["amount"]),
+
+    "URandomOnrane": lambda x:
+        "Grants the player 12, 14, 16, 18, or 20 onrane.",
+
+    "UnlockEmote": lambda x:
+        "Unlocks the {} emote."
+        .format(x["id"]),
+
+    "UnlockPortal": lambda x:
+        "Unlocks a {}."
+        .format(x["lockedName"]),
+
+    "UnlockSkin": lambda x:
+        "Unlocks skin type {}."
+        .format(x["skinType"]),
+
+    "VampireBlast": lambda x:
+        "Steals {} HP within {} tiles. Centered around the player's cursor."
+        .format(x["totalDamage"], x["radius"]),
+
+    "XPBoost": lambda x:
+        "Grants a 50% loot boost for {} minutes."
+        .format(int(x["duration"]) / 60)
 }
