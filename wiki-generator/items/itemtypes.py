@@ -10,10 +10,10 @@ SacredIDToDesc = {
     4: "Treasure Hunter: On loot roll, 8% chance to apply a 100% drop chance increase. Stackable.",
     5: "Adrenaline Rush: On hit, 8% chance to ignore incoming damage. Stackable.",
     6: "Arcane Grace: On ability use, 7% chance to not use any mana. Stackable.",
-    7: "Helping Hand: On ability use, 7% chance to remove 1 negative effect per player in a 3 tile radius. Stackable.",
+    7: "Helping Hand: On ability use, 7% chance to give 10 attack and 10 defense to each player in a 3 tile radius for 5 seconds. Stackable.",
     8: "Galactic Valor: All status effect durations are increased by 5%. Stackable.",
-    9: "Collector's Edition: All stats are increased by 0.75% per sacred item in inventory. Stackable.",
-    10: "Critical Focus: On enemy hit, 7% increase might by 10% of total luck. Stackable."
+    9: "Collector's Edition: All stats are increased by 0.65% per sacred item in inventory. Stackable.",
+    10: "Critical Focus: On enemy hit, 7% chance to increase might by 10% of total luck. Stackable."
 }
 
 SlotToCategory = {
@@ -127,9 +127,42 @@ StatIDToName = {
     "122": "Protection",
 }
 
+def formatRandVals(ae):
+    randVals = ae["randVals"]
+    effs = randVals.replace(" ", "").split(",")
+    if (len(effs) == 0):
+        return "Sick or Bravery"
+    elif (len(effs) == 1):
+        return effs[0]
+    elif (len(effs) == 2):
+        return " or ".join(effs)
+    else:
+        ret = ", ".join(effs[:-1])
+        ret += ", or " + effs[-1]
+        return ret
+
+def pluralize(ae, attr, text):
+    att = ae[attr]
+    ret = att + " " + text
+    if (abs(float(att) - 1.0) < 0.001):
+        return ret
+    else:
+        return ret + "s"
+
+def pMinutes(ae):
+    att = round(int(ae["duration"]) / 60, 2) # duration is in seconds
+    if (abs(att - 1.0) < 0.001):
+        return str(att) + " minute"
+    else:
+        return str(att) + " minutes"
+
+pRange = lambda x: pluralize(x, "range", "tile")
+pDuration = lambda x: pluralize(x, "duration", "second")
+
 statName = lambda x: StatIDToName.get(x, "unknown stat")
-wisMod = lambda x: "Uses wis mod." if x.get("useWisMod", "") == "true" else "Does not use wis mod."
+wismod = lambda x: " Uses wis mod." if x.get("useWisMod", "") == "true" else " Does not use wis mod."
 unusedAE = lambda eff: "Unused Activated Effect: " + eff + "."
+notImplementedAE = lambda eff: "\"" + eff + "\" Activated Effect not implemented."
 emptyAE = ""
 
 
@@ -137,7 +170,7 @@ emptyAE = ""
 # Always capitalize the sentence and put punctuation at the end.
 AOEFormatter = {
     "IncrementStat": lambda x: "{:+d} {}.".format(int(x["amount"]), statName(x["stat"])),
-    "EffectEquip": lambda x: "Grants {} after {} seconds.".format(x["effect"], x["delay"])
+    "EffectEquip": lambda x: "Grants {} after {}.".format(x["effect"], pluralize(x, "delay", "second"))
 }
 
 # Alays capitalize the sentence and put punctuation at the end.
@@ -150,6 +183,7 @@ AEFormatter = {
     "BigStasisBlast": lambda x: unusedAE("BigStasisBlast"),
     "BlizzardBox": lambda x: unusedAE("BlizzardBox"),
     "BronzeLockbox": lambda x: unusedAE("BronzeLockbox"),
+    "BulletNova2": lambda x: unusedAE("BulletNova2"),
     "BurningLightning": lambda x: unusedAE("BurningLightning"),
     "ChangeSkin": lambda x: unusedAE("ChangeSkin"),
     "ChristmasPopper": lambda x: unusedAE("ChristmasPopper"),
@@ -180,6 +214,7 @@ AEFormatter = {
     "PoZPage": lambda x: unusedAE("PoZPage"),
     "RageReapBox": lambda x: unusedAE("RageReapBox"),
     "RandomKantos": lambda x: unusedAE("RandomKantos"),
+    "RDiceActivate": lambda x: unusedAE("RDiceActivate"),
     "RenamePet": lambda x: unusedAE("RenamePet"),
     "RevivementBox": lambda x: unusedAE("RevivementBox"),
     "ShootEff": lambda x: unusedAE("ShootEff"),
@@ -196,201 +231,179 @@ AEFormatter = {
     "WigWeekBox": lambda x: unusedAE("WigWeekBox"),
     "WorldBossActivate": lambda x: unusedAE("WorldBossActivate"),
 
+    # used on some items but don't do anything
+    "AsiHeal": lambda x: notImplementedAE("AsiHeal"),
+    "BlackScroll": lambda x: notImplementedAE("BlackScroll"),
+    "BrownScroll": lambda x: notImplementedAE("BuildTower"),
+    "BuildTower": lambda x: notImplementedAE("BuildTower"),
+    "ClearConditionEffectSelf": lambda x: notImplementedAE("ClearConditionEffectSelf"),
+    "CreateGauntlet": lambda x: notImplementedAE("CreateGauntlet"),
+    "CreatePet": lambda x: notImplementedAE("CreatePet"),
+    "Dice": lambda x: notImplementedAE("Dice"),
+    "FUnlockPortal": lambda x: notImplementedAE("FUnlockPortal"),
+    "HealNovaSigil": lambda x: notImplementedAE("HealNovaSigil"),
+    "LootboxActivate": lambda x: notImplementedAE("LootboxActivate"),
+    "MysteryPortal": lambda x: notImplementedAE("MysteryPortal"),
+    "OPBUFF": lambda x: notImplementedAE("OPBUFF"),
+    "PermaPet": lambda x: notImplementedAE("PermaPet"),
+    "PetStoneActivate": lambda x: notImplementedAE("PetStoneActivate"),
+    "RoyalTrap": lambda x: notImplementedAE("RoyalTrap"),
+    "SpiderTrap": lambda x: notImplementedAE("SpiderTrap"),
 
+    # tooltips that are made by <ExtraTooltipInfo> or something
+    "AscensionActivate": lambda x: emptyAE,
+    "AstonAbility": lambda x: emptyAE, # does the same as Shoot
+    "BurstInferno": lambda x: emptyAE,
+    "DreamEssenceActivate": lambda x: emptyAE,
+    "FameActivate": lambda x: emptyAE,
+    "Gift": lambda x: emptyAE,
+    "InsigniaActivate": lambda x: emptyAE,
+    "JacketAbility": lambda x: emptyAE,
+    "JacketAbility2": lambda x: emptyAE,
+    "MarksActivate": lambda x: emptyAE,
     "SamuraiAbility": lambda x: emptyAE,
     "Shoot": lambda x: emptyAE,
     "ShurikenAbility": lambda x: emptyAE,
     "SiphonAbility": lambda x: emptyAE,
-
+    "TalismanAbility": lambda x: emptyAE,
 
     "ActivateFragment": lambda x:
-        "\"ActivateFragment\" Activated Effect not yet implemented.",
-
-    "AscensionActivate": lambda x:
-        "\"AscensionActivate\" Activated Effect not yet implemented.",
-
-    "AsiHeal": lambda x:
-        "\"AsiHeal\" Activated Effect not yet implemented.",
-
-    "AstonAbility": lambda x:
-        "\"AstonAbility\" Activated Effect not yet implemented.",
+        "Grants the player either 5, 10, or 15 Sacred Fragments.",
 
     "Backpack": lambda x:
-        "\"Backpack\" Activated Effect not yet implemented.",
+        "Unlocks the player's backpack.",
 
     "Banner": lambda x:
-        "\"Banner\" Activated Effect not yet implemented.",
-
-    "BlackScroll": lambda x:
-        "\"BlackScroll\" Activated Effect not yet implemented.",
-
-    "BrownScroll": lambda x:
-        "\"BrownScroll\" Activated Effect not yet implemented.",
-
-    "BuildTower": lambda x:
-        "\"BuildTower\" Activated Effect not yet implemented.",
+        "Within {}, empowers allies for {}. Stays active for {}."
+        .format(pRange(x), pDuration(x), pluralize(x, "amount", "second")),
 
     "BulletNova": lambda x:
-        "\"BulletNova\" Activated Effect not yet implemented.",
-
-    "BulletNova2": lambda x:
-        "\"BulletNova2\" Activated Effect not yet implemented.",
-
-    "BurstInferno": lambda x:
-        "\"BurstInferno\" Activated Effect not yet implemented.",
+        "Shoots 12 shots in a circle around the cursor.",
 
     "ClearConditionEffectAura": lambda x:
-        "\"ClearConditionEffectAura\" Activated Effect not yet implemented.",
-
-    "ClearConditionEffectSelf": lambda x:
-        "\"ClearConditionEffectSelf\" Activated Effect not yet implemented.",
+        "Within {}: if a player has the effect {}, removes {} from them."
+        .format(pRange(x), x["checkExistingEffect"], x["effect"]),
 
     "ConditionEffectAura": lambda x:
-        "\"ConditionEffectAura\" Activated Effect not yet implemented.",
+        "Party effect: {} for {} within {}.{}"
+        .format(x["effect"], pDuration(x), pRange(x), wismod(x)),
 
     "ConditionEffectSelf": lambda x:
-        "\"ConditionEffectSelf\" Activated Effect not yet implemented.",
+        "On self: {} for {}.{}"
+        .format(x["effect"], pDuration(x), wismod(x)),
 
     "Create": lambda x:
-        "\"Create\" Activated Effect not yet implemented.",
-
-    "CreateGauntlet": lambda x:
-        "\"CreateGauntlet\" Activated Effect not yet implemented.",
-
-    "CreatePet": lambda x:
-        "\"CreatePet\" Activated Effect not yet implemented.",
+        "Creates a {}."
+        .format(x["id"]),
 
     "DDiceActivate": lambda x:
-        "\"DDiceActivate\" Activated Effect not yet implemented.",
+        "Grants Weak, Bravery, or Damaging for {}."
+        .format(pDuration(x)),
 
     "DamageNova": lambda x:
-        "\"DamageNova\" Activated Effect not yet implemented.",
+        "Does {} damage within {}.{}"
+        .format(x["amount"], pRange(x), wismod(x)),
 
     "Decoy": lambda x:
-        "\"Decoy\" Activated Effect not yet implemented.",
-
-    "Dice": lambda x:
-        "\"Dice\" Activated Effect not yet implemented.",
+        "Creates a decoy that lasts for {}."
+        .format(pDuration(x)),
 
     "DiceActivate": lambda x:
-        "\"DiceActivate\" Activated Effect not yet implemented.",
-
-    "DreamEssenceActivate": lambda x:
-        "\"DreamEssenceActivate\" Activated Effect not yet implemented.",
+        "Grants {} for {}."
+        .format(formatRandVals(x), pDuration(x)),
 
     "Dye": lambda x:
-        "\"Dye\" Activated Effect not yet implemented.",
+        "Changes the character's dye.",
 
     "EffectRandom": lambda x:
-        "\"EffectRandom\" Activated Effect not yet implemented.",
-
-    "FUnlockPortal": lambda x:
-        "Unlocks a {}.".format(x["lockedName"]),
-
-    "FameActivate": lambda x:
-        "\"FameActivate\" Activated Effect not yet implemented.",
+        "Grants a random effect.",
 
     "GenericActivate": lambda x:
-        "\"GenericActivate\" Activated Effect not yet implemented.",
-
-    "Gift": lambda x:
-        "\"Gift\" Activated Effect not yet implemented.",
+        "{} Effect: "
+        .format("Enemy" if x["target"] == "enemy" else "Party")
+        + "{} for {} within {}. "
+        .format(x["effect"], pDuration(x), pRange(x))
+        + "Centered around the {}."
+        .format("player's cursor" if x["center"] == "mouse" else x["center"]),
 
     "Heal": lambda x:
-        "\"Heal\" Activated Effect not yet implemented.",
+        "Heals {} health."
+        .format(x["amount"]),
 
     "Heal2": lambda x:
-        "\"Heal2\" Activated Effect not yet implemented.",
+        "Heals health based on the player's Restoration stat.",
 
     "HealNova": lambda x:
-        "Heals {} HP within {} tiles. {}"
-        .format(x["amount"], float(x["range"]), wisMod(x)),
-
-    "HealNovaSigil": lambda x:
-        "\"HealNovaSigil\" Activated Effect not yet implemented.",
+        "Heals {} HP within {}.{}"
+        .format(x["amount"], pRange(x), wismod(x)),
 
     "IncrementStat": lambda x:
         "Permanently increases {} by {}."
         .format(statName(x["stat"]), x["amount"]),
 
-    "InsigniaActivate": lambda x:
-        "\"InsigniaActivate\" Activated Effect not yet implemented.",
-
-    "JacketAbility": lambda x:
-        "\"JacketAbility\" Activated Effect not yet implemented.",
-
-    "JacketAbility2": lambda x:
-        "\"JacketAbility2\" Activated Effect not yet implemented.",
-
     "LDBoost": lambda x:
-        "\"LDBoost\" Activated Effect not yet implemented.",
+        "Increases loot drop chance by 50% for {}."
+        .format(pMinutes(x)),
 
     "LTBoost": lambda x:
-        "\"LTBoost\" Activated Effect not yet implemented.",
+        "Increases loot tier by 1 for {}."
+        .format(pMinutes(x)),
 
     "Lightning": lambda x:
-        "\"Lightning\" Activated Effect not yet implemented.",
-
-    "LootboxActivate": lambda x:
-        "\"LootboxActivate\" Activated Effect not yet implemented.",
+        "Lightning: {} damage to {}.{}"
+        .format(x["totalDamage"], pluralize(x, "maxTargets", "target"), wismod(x))
+        + ("\nLightning effect: {} for {}."
+            .format(x["condEffect"], pluralize(x, "condDuration", "second"))
+            if x.get("condEffect", "") != "" else ""),
 
     "Magic": lambda x:
-        "\"Magic\" Activated Effect not yet implemented.",
+        "Restores {} mana."
+        .format(x["amount"]),
 
     "Magic2": lambda x:
-        "\"Magic2\" Activated Effect not yet implemented.",
+        "Restores mana based on the player's restoration.",
 
     "MagicNova": lambda x:
-        "\"MagicNova\" Activated Effect not yet implemented.",
-
-    "MarksActivate": lambda x:
-        "\"MarksActivate\" Activated Effect not yet implemented.",
-
-    "MysteryPortal": lambda x:
-        "\"MysteryPortal\" Activated Effect not yet implemented.",
-
-    "OPBUFF": lambda x:
-        "\"OPBUFF\" Activated Effect not yet implemented.",
+        "Restores {} mana within {}."
+        .format(x["amount"], pRange(x)),
 
     "OnraneActivate": lambda x:
-        "\"OnraneActivate\" Activated Effect not yet implemented.",
-
-    "PermaPet": lambda x:
-        "\"PermaPet\" Activated Effect not yet implemented.",
+        "Grants the player {} onrane."
+        .format(x["amount"]),
 
     "Pet": lambda x:
-        "\"Pet\" Activated Effect not yet implemented.",
-
-    "PetStoneActivate": lambda x:
-        "\"PetStoneActivate\" Activated Effect not yet implemented.",
+        "Creates a {} pet."
+        .format(x["objectId"]),
 
     "PoisonGrenade": lambda x:
-        "\"PoisonGrenade\" Activated Effect not yet implemented.",
+        "Poison Grenade:\n"
+        + "After {}, {} impact damage + {} damage over {}.{}"
+        .format(pluralize(x, "throwTime", "second"), x["impactDamage"], x["totalDamage"], pDuration(x), wismod(x)),
 
     "PowerStat": lambda x:
-        "\"PowerStat\" Activated Effect not yet implemented.",
+        "Permanently increases {} by {}. Can only be used by ascended characters."
+        .format(StatIDToName[x["stat"]], x["amount"]),
 
     "RandomCurrency": lambda x:
-        "\"RandomCurrency\" Activated Effect not yet implemented.",
+        "Grants the player either {} {}."
+        .format(formatRandVals(x), x["currencyType"]),
 
     "RandomGold": lambda x:
-        "\"RandomGold\" Activated Effect not yet implemented.",
+        "Grants the player either 250, 500, or 750 gold.",
 
     "RandomOnrane": lambda x:
-        "\"RandomOnrane\" Activated Effect not yet implemented.",
+        "Grants the player either 2, 4, 6, 8, or 10 onrane.",
 
     "RemoveNegativeConditions": lambda x:
-        "\"RemoveNegativeConditions\" Activated Effect not yet implemented.",
+        "Removes negative conditions from players within {}."
+        .format(pRange(x)),
 
     "RemoveNegativeConditionsSelf": lambda x:
-        "\"RemoveNegativeConditionsSelf\" Activated Effect not yet implemented.",
-
-    "RoyalTrap": lambda x:
-        "\"RoyalTrap\" Activated Effect not yet implemented.",
+        "Removes negative condition effects from self.",
 
     "SacredActivate": lambda x:
-        "Grants the player {} sacred fragments."
-        .format(x["amount"]),
+        "Grants the player {}."
+        .format(pluralize(x, "amount", "sacred fragment")),
 
     "SorConstruct": lambda x:
         "Constructs a Sor Crystal.",
@@ -401,33 +414,39 @@ AEFormatter = {
     "SorMachine": lambda x:
         "Transforms a Legendary Sor Crystal into a useful item.",
 
-    "SpiderTrap": lambda x:
-        "\"SpiderTrap\" Activated Effect not yet implemented.",
-
     "StasisBlast": lambda x:
-        "Effect on enemies: Within 3 tiles of the player's cursor, Stasis for {} seconds."
-        .format(x["duration"]),
+        "Enemy effect: Within 3 tiles of the player's cursor, Stasis for {}."
+        .format(pDuration(x)),
 
     "StatBoostAura": lambda x:
-        "Effect on party: Within {} tiles, {:+d} {} for {} seconds. {}"
-        .format(x["range"], int(x["amount"]), statName(x["stat"]), x["duration"], wisMod(x)),
+        "Party effect: Within {}, {:+d} {} for {}.{}"
+        .format(pRange(x), int(x["amount"]), statName(x["stat"]), pDuration(x), wismod(x)),
 
     "StatBoostSelf": lambda x:
-        "Effect on self: {:+d} {} for {} seconds. {}"
-        .format(int(x["amount"]), statName(x["stat"]), x["duration"], wisMod(x)),
-
-    "TalismanAbility": lambda x:
-        "\"TalismanAbility\" Activated Effect not yet implemented.",
+        "Effect on self: {:+d} {} for {}.{}"
+        .format(int(x["amount"]), statName(x["stat"]), pDuration(x), wismod(x)),
 
     "Teleport": lambda x:
-        "Teleports the player to the cursor, with a maximum distance of {} tiles."
-        .format(x["maxDistance"]),
+        "Teleports the player to the cursor, with a maximum distance of {}."
+        .format(pluralize(x, "maxDistance", "tile")),
 
     "Torii": lambda x:
-        "\"Torii\" Activated Effect not yet implemented.",
+        "Spawns {} Torii.\n"
+        .format("a defensive" if x["players"] == "true" else "an offensive")
+        + "Within {}: {} for {}.\n"
+        .format(pRange(x), x["effect"], pDuration(x))
+        + "Disappears after {}."
+        .format(pluralize(x, "amount", "second")),
 
     "Trap": lambda x:
-        "\"Trap\" Activated Effect not yet implemented.",
+        "Trap: {} damage within {}."
+        .format(x["totalDamage"], pluralize(x, "radius", "tile"))
+        + ("\nOn enemies: {} for {}."
+            .format(x["condEffect"], pluralize(x, "condDuration", "second"))
+            if x.get("condEffect", "") != "" else "")
+        + ("\nThrow time: {}."
+            .format(pluralize(x, "throwTime", "second"))
+            if x.get("throwTime", "") != "" else "\nThrow time: 1 second."),
 
     "TreasureActivate": lambda x:
         "Grants the player {} gold."
@@ -441,18 +460,18 @@ AEFormatter = {
         .format(x["id"]),
 
     "UnlockPortal": lambda x:
-        "Unlocks a {}."
-        .format(x["lockedName"]),
+        "Unlocks a{} {}."
+        .format("n" if x["lockedName"][0] in "AEIOUaeiou" else "", x["lockedName"]),
 
     "UnlockSkin": lambda x:
         "Unlocks skin type {}."
         .format(x["skinType"]),
 
     "VampireBlast": lambda x:
-        "Steals {} HP within {} tiles. Centered around the player's cursor."
-        .format(x["totalDamage"], x["radius"]),
+        "Steals {} HP within {}. Centered around the player's cursor."
+        .format(x["totalDamage"], pluralize(x, "radius", "tile")),
 
     "XPBoost": lambda x:
-        "Grants a 50% loot boost for {} minutes."
-        .format(int(x["duration"]) / 60)
+        "Grants a 50% experience boost for {}."
+        .format(pMinutes(x))
 }
