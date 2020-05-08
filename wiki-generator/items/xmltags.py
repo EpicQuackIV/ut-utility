@@ -52,7 +52,7 @@ class ExtraTooltipData():
                 ret.append(eff[0] + eff[1])
             else:
                 ret.append(eff[0] + ": " + eff[1])
-        return "\n".join(ret)
+        return "\n".join(ret) + "\n"
  
 
 class Projectile():
@@ -131,9 +131,9 @@ class Projectile():
         if (this.Item != None and SlotToCategory[this.Item.SlotType] == "weapon"):
             ret.append(str(int(this.Item.RateOfFire * 100)) + "% rate of fire.")
             if (this.Item.NumProjectiles > 1):
-                ret.append("Shoots " + str(this.Item.NumProjectiles) + " shots at a " + str(this.Item.ArcGap) + " degree angle.")
+                ret.append("Shoots " + str(this.Item.NumProjectiles) + " projectiles at a " + str(this.Item.ArcGap) + " degree angle.")
             else:
-                ret.append("Shoots 1 shot.")
+                ret.append("Shoots 1 projectile.")
         ret.append("Range: " + str(round(this.Speed * this.LifetimeMS * (0.00005 if this.Boomerang else 0.0001), 2)) + " tiles.")
         if (this.Amplitude > 0):
             ret.append("Shots have an amplitude of " + str(round(this.Amplitude, 2)) + " and a frequency of " + str(round(this.Frequency)) + ".")

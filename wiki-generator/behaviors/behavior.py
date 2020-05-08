@@ -1,15 +1,5 @@
-'''
-Behavior(host)
-Behavior.Load(src)
-TrimLine(src)
+from utils import *
 
-string host
-Dictionary<string, string> behaviors
-List<string> states
-List<string> transitions
-'''
-import behaviors.utils as u
-from glob import glob
 class Behavior:
 
     host = ""
@@ -18,11 +8,11 @@ class Behavior:
     transitions = []
 
     def __init__(this, hostBehav):
-        '''Sets the behavior's host variable.'''
+        '''Sets the behavior's host variable and calls the Load() method.'''
         this.behaviors = []
         this.states = []
         this.transitions = []
-        this.host = u.firstString(hostBehav)
+        this.host = firstString(hostBehav)
         this.Load(hostBehav)
 
     def Load(this, src):
@@ -34,16 +24,16 @@ class Behavior:
             tLine = TrimBehaviorLine(line)
             if (len(tLine) == 0):
                 continue
-            sLine = u.beforeFirst(tLine, "(").strip(" ")
+            sLine = beforeFirst(tLine, "(").strip(" ")
             if (len(sLine) == 0):
                 return
             elif sLine.lower().find("state") != -1:
-                this.states.append(u.firstString(tLine))
+                this.states.append(firstString(tLine))
             elif sLine.lower().find("transition") != -1:
                 this.transitions.append(sLine)
             else:
-                dats = u.firstString(tLine)
-                dats2 = u.firstNumber(u.afterFirst(tLine, dats))
+                dats = firstString(tLine)
+                dats2 = firstNumber(afterFirst(tLine, dats))
                 if (len(dats) > 0 or dats2 > 0):# and dats.find("Potion") == -1):
                     this.behaviors.append((sLine, (dats, dats2)))
 
@@ -53,9 +43,9 @@ class Behavior:
 
 def TrimBehaviorLine(src):
     '''Returns an empty string or a string starting at the behavior's name.'''
-    if (u.beforeFirst(src, "new ").find("//") != -1):
+    if (beforeFirst(src, "new ").find("//") != -1):
         return ""
-    return u.afterFirst(src, "new ")
+    return afterFirst(src, "new ")
 
 def GetBehaviors(src):
     '''Returns an array of behaviors, parsed from the src parameter.'''
@@ -68,21 +58,21 @@ def GetBehaviors(src):
 
 def GetBehaviorsFromGlob(globSrc):
     '''Returns an array containing every behavior from every file in the globSrc parameter.'''
+    from glob import glob
     ret = []
     for fileName in glob(globSrc):
-        print (u.afterFirst(fileName, "."))
+        print (afterFirst(fileName, "."))
         fo = open(fileName)
         fileText = fo.read()
         fo.close()
         ret.extend(GetBehaviors(fileText))
     return ret
 
-def GetLootAndPerc(behavs, excludeCondition):
-    '''
-    Params: Behavior[] behavs, predicate<Tuple<string, float>> excludeCondition
-    Returns: string
-    Returns a formatted string containing a list of enemies, loot, and drop chances. Does not include loots where excludeCondition(loot) is True.
-    '''
+def GetEnemyLootAndPerc(behavs, excludeCondition):
+    ''' Params: Behavior[] behavs, predicate<Tuple<string, float>> excludeCondition
+        Returns: string
+        Returns a formatted string containing a list of enemies, loot, and drop chances. Does not include loots where excludeCondition(loot) is True.
+        '''
     ret = ""
 
     for behav in behavs:
@@ -103,12 +93,29 @@ def GetLootAndPerc(behavs, excludeCondition):
 
     return ret
 
+def GetLootAndEnemyPerc(behavs):
+    ''' Params: Behavior[] behavs
+        Returns: Dictionary<string, List<Tuple<string, float>>>
+        Returns: 
+        '''
+    lootPercs = {}
+    for behav in behavs:
+        #select only itemloot behaviors
+        loots = behav.BehaviorsOfType("ItemLoot");
+        
+        for loot in loots:
+            if (loot[0] not in lootPercs):
+                lootPercs[loot[0]] = [(behav.host, round(loot[1] * 100, 5))]
+            else:
+                lootPercs[loot[0]].append((behav.host, round(loot[1] * 100, 5)))
+
+    return lootPercs
+
 def GetAllDrops(behavs, exclude=[]):
-    '''
-    Params: Behavior[] behavs, string[] exclude
-    Returns: string[]
-    Returns a string[] with every item that drops in the behavs parameter and is not in the exclude parameter. No repeated items and the items are alphabetically sorted.
-    '''
+    ''' Params: Behavior[] behavs, string[] exclude
+        Returns: string[]
+        Returns a string[] with every item that drops in the behavs parameter and is not in the exclude parameter. No repeated items and the items are alphabetically sorted.
+        '''
     ret = []
     for behav in behavs:
         loots = behav.BehaviorsOfType("ItemLoot")

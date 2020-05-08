@@ -161,6 +161,7 @@ pDuration = lambda x: pluralize(x, "duration", "second")
 
 statName = lambda x: StatIDToName.get(x, "unknown stat")
 wismod = lambda x: " Uses wis mod." if x.get("useWisMod", "") == "true" else " Does not use wis mod."
+isPerc = lambda x: "%" if x.get("isPerc", "") == "true" else ""
 unusedAE = lambda eff: "Unused Activated Effect: " + eff + "."
 notImplementedAE = lambda eff: "\"" + eff + "\" Activated Effect not implemented."
 emptyAE = ""
@@ -169,7 +170,7 @@ emptyAE = ""
 
 # Always capitalize the sentence and put punctuation at the end.
 AOEFormatter = {
-    "IncrementStat": lambda x: "{:+d} {}.".format(int(x["amount"]), statName(x["stat"])),
+    "IncrementStat": lambda x: "{:+d}{} {}.".format(int(x["amount"]), isPerc(x), statName(x["stat"])),
     "EffectEquip": lambda x: "Grants {} after {}.".format(x["effect"], pluralize(x, "delay", "second"))
 }
 
@@ -264,7 +265,6 @@ AEFormatter = {
     "SamuraiAbility": lambda x: emptyAE,
     "Shoot": lambda x: emptyAE,
     "ShurikenAbility": lambda x: emptyAE,
-    "SiphonAbility": lambda x: emptyAE,
     "TalismanAbility": lambda x: emptyAE,
 
     "ActivateFragment": lambda x:
@@ -404,6 +404,18 @@ AEFormatter = {
     "SacredActivate": lambda x:
         "Grants the player {}."
         .format(pluralize(x, "amount", "sacred fragment")),
+        
+    "SiphonAbility": lambda x:
+        "Siphon Radius: {}.\n"
+        .format(pRange(x))
+        + "Base Damage: {}.\n"
+        .format(x["amount"])
+        + "Mana Recovery: {}.\n"
+        .format(pDuration(x))
+        + "While ability key is held, drains {} hp/second.\n"
+        .format(x.get("amount2", "50"))
+        + "When ability key is released, damages enemies based on health"
+        + " drained, current mana, wisdom stat, and this item's base damage.",
 
     "SorConstruct": lambda x:
         "Constructs a Sor Crystal.",
@@ -419,8 +431,8 @@ AEFormatter = {
         .format(pDuration(x)),
 
     "StatBoostAura": lambda x:
-        "Party effect: Within {}, {:+d} {} for {}.{}"
-        .format(pRange(x), int(x["amount"]), statName(x["stat"]), pDuration(x), wismod(x)),
+        "Party effect: Within {}, {:+d}{} {} for {}.{}"
+        .format(pRange(x), int(x["amount"]), isPerc(x), statName(x["stat"]), pDuration(x), wismod(x)),
 
     "StatBoostSelf": lambda x:
         "Effect on self: {:+d} {} for {}.{}"

@@ -35,6 +35,7 @@ class Item():
     Legend = None
     Fabled = False
     RT = False
+    Untiered = Tier == -1
 
     BagType = 0 # brown bag
     FameBonus = 0
