@@ -134,19 +134,25 @@ class Item():
             aes = []
             for ae in this.Activate:
                 aes.append(AEFormatter.get(ae[0], lambda x: "Unknown Effect \"" + ae[0] + "\" on item \"" + this.Id + "\"")(ae[1]))
-            aes.sort()
-            aes.insert(0, "\nWhen used:")
-            ret.append("\n".join(aes))
+            while "" in aes:
+                aes.remove("")
+            if (len(aes) > 0):
+                aes.sort()
+                aes.insert(0, "\nWhen used:")
+                ret.append("\n".join(aes))
 
         if (len(this.ActivateOnEquip) > 0):
             aoes = []
             for aoe in this.ActivateOnEquip:
                 aoes.append(AOEFormatter.get(aoe[0], lambda x: "Unknown Effect \"" + aoe[0] + "\" on item \"" + this.Id + "\"")(aoe[1]))
-            aoes.sort()
-            aoes.insert(0, "\nWhile equipped:")
-            ret.append("\n".join(aoes))
+            while "" in aoes:
+                aoes.remove("")
+            if (len(aoes) > 0):
+                aoes.sort()
+                aoes.insert(0, "\nWhile equipped:")
+                ret.append("\n".join(aoes))
 
-        return "\n".join(ret) + "\n"
+        return "\n".join(ret) + "\n" if len(ret) > 0 else ""
 
     def makeTierText(this):
         if (this.GodSlayer):

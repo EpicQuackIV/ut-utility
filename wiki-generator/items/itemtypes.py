@@ -161,6 +161,7 @@ pDuration = lambda x: pluralize(x, "duration", "second")
 
 statName = lambda x: StatIDToName.get(x, "unknown stat")
 wismod = lambda x: " Uses wis mod." if x.get("useWisMod", "") == "true" else " Does not use wis mod."
+atkmod = lambda x: " Uses atk mod." if x.get("useAtkMod", "") == "true" else " Does not use atk mod."
 isPerc = lambda x: "%" if x.get("isPerc", "") == "true" else ""
 unusedAE = lambda eff: "Unused Activated Effect: " + eff + "."
 notImplementedAE = lambda eff: "\"" + eff + "\" Activated Effect not implemented."
@@ -262,9 +263,7 @@ AEFormatter = {
     "JacketAbility": lambda x: emptyAE,
     "JacketAbility2": lambda x: emptyAE,
     "MarksActivate": lambda x: emptyAE,
-    "SamuraiAbility": lambda x: emptyAE,
     "Shoot": lambda x: emptyAE,
-    "ShurikenAbility": lambda x: emptyAE,
     "TalismanAbility": lambda x: emptyAE,
 
     "ActivateFragment": lambda x:
@@ -404,6 +403,16 @@ AEFormatter = {
     "SacredActivate": lambda x:
         "Grants the player {}."
         .format(pluralize(x, "amount", "sacred fragment")),
+
+    "SamuraiAbility": lambda x:
+        "While ability key is held, Berserk on self and drains 10 mp/second.\n"
+        + "When ability key is released, {} damage within {}.{}"
+        .format(x["totalDamage"], pRange(x), atkmod(x)),
+
+    "ShurikenAbility": lambda x:
+        "While ability key is held, Speedy on self and drains 10 mp/second.\n"
+        "When ability key is released, shoots a shuriken.{}"
+        .format(atkmod(x)),
         
     "SiphonAbility": lambda x:
         "Siphon Radius: {}.\n"
