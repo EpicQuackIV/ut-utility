@@ -81,22 +81,3 @@ def percentToRate(x):
     if (x >= 40.0):
         return ""
     return " (1/" + str(int(10000/(x * 100))) + ")"
-
-def formatOutput(itemList, dropLocations):
-    ''' Params: List<Item> itemList, Dictionary<string, List<Tuple<string, float>>> dropLocations
-        Returns: string
-        Returns a formatted string containing the items from itemList and their drop locations.
-        '''
-    lout = []
-    for it in itemList:
-        loc = dropLocations.get(it.Id, None)
-        if (loc != None):
-            locs = ["\nDrops from:"]
-            for l in loc:
-                locs.append(l[0] + ": " + str(l[1]) + "%" + percentToRate(l[1]) + " chance.")
-            locs.sort()
-            lout.append(str(it) + "\n".join(locs) + "\n")
-        else:
-            lout.append(str(it) + "\nDoes not drop from enemies.\n")
-
-    return "\n==================\n\n".join(lout)
