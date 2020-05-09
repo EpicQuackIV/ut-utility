@@ -1,5 +1,6 @@
 import behaviors.behavior as behavior
 from items.item import GetItems
+from items.itemtypes import SlotToCategory, SlotToSlotType
 import utils
 
 class WikiGenerator:
@@ -36,12 +37,34 @@ class WikiGenerator:
 
         wikiOut = "\n==================\n\n".join(lout)
 
-        fout = open(path, "r+")
-        fout.truncate(0)
+        fout = open(path, "w")
         fout.write(wikiOut)
         fout.close()
 
+    def MakeDirs(this, path):
+        import os
+        if (not os.path.isdir(path)):
+            raise Exception("Directory does not exist: \"" + path + "\".")
+
+        for x in SlotToCategory.items():
+            if (x[1] != SlotToSlotType[x[0]]):
+                os.makedirs(path + "/" + x[1] + "/" + SlotToSlotType[x[0]], exist_ok=True)
+            else:
+                os.makedirs(path + "/" + x[1], exist_ok=True)
+
+    def MakeWiki(this, path):
+        this.MakeDirs(path)
+        for it in this.items:
+            sCat = SlotToCategory[it.SlotType]
+            sTyp = SlotToSlotType[it.SlotType]
+            extPath = "/" + sCat if sCat == sTyp else "/" + sCat + "/" + sTyp
+            itFile = utils.FormatFileName(it.Id, "txt") 
+
+            fout = open(path + extPath + "/" + itFile, "w")
+            fout.write(this.FormatItem(it))
+            fout.close()
+
 if (__name__ == "__main__"):
     wg = WikiGenerator("something/ut-core-master/server")
-
-    wg.PrintItemsToFile("something/ut-utility/output/xml-parser.txt")
+    #wg.PrintItemsToFile("something/ut-utility/output/xml-parser.txt")
+    wg.MakeWiki("something/ut-utility/output/wiki")

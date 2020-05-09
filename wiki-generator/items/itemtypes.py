@@ -44,7 +44,7 @@ SlotToCategory = {
     25: "ability", # shuriken
     26: "consumable", # pet-egg
     27: "ability", # sheath
-    28: "abilty", # banner
+    28: "ability", # banner
     29: "weapon", # lance
     30: "ability", # siphon
     31: "ability", # turret
@@ -61,10 +61,10 @@ SlotToSlotType = {
     3 : "bow",
     4 : "tome",
     5 : "shield",
-    6 : "leather-armor",
-    7 : "heavy-armor",
+    6 : "leather_armor",
+    7 : "heavy_armor",
     8 : "wand",
-    9 : "ring",
+    9 : "accessory",
     10: "consumable",
     11: "spell",
     12: "seal",
@@ -81,7 +81,7 @@ SlotToSlotType = {
     23: "scepter",
     24: "katana",
     25: "shuriken",
-    26: "pet-egg",
+    26: "pet_egg",
     27: "sheath",
     28: "banner",
     29: "lance",
