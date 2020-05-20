@@ -1,0 +1,95 @@
+
+<style>
+* {
+  font-family: Verdana, Geneva, sans-serif;
+}
+
+*[open] > summary {
+  font-weight: bold;
+}
+
+* > summary {
+  cursor: pointer;
+}
+
+details.cat > summary, details.typ > summary {
+  padding: 6px;
+  width: 200px;
+  border: solid;
+}
+
+details.cat > summary {
+  background-color: #e8e8e8;
+  margin-left: 0px;
+  border-color: #606060;
+  font-size: 18px;
+}
+
+details.typ > summary {
+  background-color: #f0f0f0;
+  margin-left: 16px;
+  border-color: #808080;
+  font-size: 16px;
+}
+
+details.wikiItem {
+  background-color: #f6f6f6;
+  padding: 8px;
+  border: solid;
+  border-color: #909090;
+  margin-left: 32px;
+  margin-right: 32px;
+  font-size: 14px;
+}
+
+details.wikiItem > p {
+  margin-left: 12px;
+}
+</style>
+
+<script type="text/javascript">
+var retrieved = [];
+function safeText(tx) {
+  return tx.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
+}
+
+function formatItemFileName(itName) {
+  var okChars = "abcdefghijklmnopqrstuvwxyz1234567890-";
+  var newName = itName.toLowerCase().replace(/ /g, "-");
+  var newerName = newName;
+  for (var x of newName) {
+    if (!okChars.includes(x)) newerName = newerName.replace(x, "");
+  }
+  return newerName;
+}
+
+function formatItemHtml(name, itText) {
+  // params are the item's name and the item's wiki text
+  ret = "<summary>" + safeText(name) + "</summary>";
+  ret += "<p>" + safeText(itText) + "</p>";
+  ret = ret.replace(/\r\n|\r|\n/g, "<br>");
+  return ret;
+}
+
+function setDetails(det, newText) {
+  if (newText.includes("The file does not exist")) {
+    det.innerHTML = formatItemHtml(det.id, "Error: item data not in wiki.");
+  } else {
+    det.innerHTML = formatItemHtml(det.id, newText);
+  }
+}
+
+function doFileStuff(evt) {
+  if (!evt.target.open || retrieved.includes(evt.target)) return;
+  retrieved.push(evt.target);
+  var itemName = formatItemFileName(evt.target.id);
+  var x = fetch("http://ut-realms.wdfiles.com/local--files/wiki%3Aequipment/" + itemName + ".txt", {mode: 'no-cors'})
+    .then(response => response.text())
+    .then(data => setDetails(evt.target, data))
+    .catch(error => setDetails(evt.target, "An unknown error occurred."));
+}
+
+for (i of document.getElementsByClassName("wikiItem")) {
+  i.addEventListener('toggle', doFileStuff);
+}
+</script>

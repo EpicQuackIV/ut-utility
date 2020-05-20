@@ -2,7 +2,7 @@ from items.xmltags import SetElementData
 from items.itemtypes import *
 import xml.etree.ElementTree as ET
 
-def GetItems(path):
+def GetItems(path, cond=lambda x: True):
     '''
     Params: string path
     Returns: list<Item>
@@ -11,7 +11,9 @@ def GetItems(path):
     xmlData = ET.parse(path).getroot()
     ret = []
     for xml in xmlData.findall(".//Object[Item]"):
-        ret.append(Item(xml))
+        it = Item(xml)
+        if (cond(it)):
+            ret.append(it)
 
     print (len(ret))
     return ret
@@ -35,7 +37,7 @@ class Item():
     Legend = None
     Fabled = False
     RT = False
-    Untiered = Tier == -1
+    Untiered = False
 
     BagType = 0 # brown bag
     FameBonus = 0
@@ -86,6 +88,8 @@ class Item():
 
         for element in itemXml:
             SetElementData(this, element)
+
+        this.Untiered = (this.Tier == -1) and not (this.GodSlayer or this.Godly or this.Sacred or this.Legendary or this.Fabled or this.RT)
 
     def __str__(this):
         try:

@@ -61,8 +61,8 @@ SlotToSlotType = {
     3 : "bow",
     4 : "tome",
     5 : "shield",
-    6 : "leather_armor",
-    7 : "heavy_armor",
+    6 : "leather-armor",
+    7 : "heavy-armor",
     8 : "wand",
     9 : "accessory",
     10: "consumable",
@@ -81,7 +81,7 @@ SlotToSlotType = {
     23: "scepter",
     24: "katana",
     25: "shuriken",
-    26: "pet_egg",
+    26: "pet-egg",
     27: "sheath",
     28: "banner",
     29: "lance",
@@ -93,6 +93,19 @@ SlotToSlotType = {
     35: "jacket",
     36: "talisman"
 }
+
+def SlotPluralize(name):
+    if (name == "blades" or name == "dice"):
+        return name
+    elif (name == "staff"):
+        return "staves"
+    else:
+        if (name[-1] == "s"):
+            return name + "es"
+        elif (name[-1] == "y"):
+            return name[:-1] + "ies"
+        else:
+            return name + "s"
 
 StatIDToName = {
     0: "Maximum HP",

@@ -80,15 +80,15 @@ def percentToRate(x):
         '''
     if (x >= 40.0):
         return ""
-    return " (1/" + str(int(10000/(x * 100))) + ")"
+    return " (1/" + str(int(100/x)) + ")"
 
 def FormatFileName(name, ext):
     ''' Params: string name, string ext
         Returns: string
         Returns a valid file name with file extension ext. Removes whitespace, commas, etc from name and makes name lowercase.
         '''
-    newName = name.lower().replace(" ", "_").replace("-", "_")
+    newName = name.lower().replace(" ", "-").replace("_", "-")
     for ch in newName:
-        if (not (ch.isalnum() or ch == "_")):
+        if (not (ch.isalnum() or ch == "-")):
             newName = newName.replace(ch, "")
     return newName + "." + ext
