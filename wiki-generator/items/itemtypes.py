@@ -330,6 +330,9 @@ AEFormatter = {
     "EffectRandom": lambda x:
         "Grants a random effect.",
 
+    "EonActivate": lambda x:
+        "Fully maxes all stats.",
+
     "GenericActivate": lambda x:
         "{} Effect: "
         .format("Enemy" if x["target"] == "enemy" else "Party")
